@@ -1,5 +1,4 @@
-from tkinter import PAGES
-import COMP1405Project.webdev as webdev
+import webdev
 
 links = {}
 titleindex = 0
@@ -35,11 +34,11 @@ def readhtml(list):
     for element in list:
         if len(element) == 0:
             continue
-        elif element[0] == "t":
+        elif element[0:6] == "title>":
             result[titleindex] = element[6:len(element)]
-        elif element[0] == "p":
+        elif element[0:2] == "p>":
             result[wordsindex] = element[2:len(element)]
-        elif element[0] == "a":
+        elif element[0:8] == "a href=\"":
             link = ""
             for letter in range(8,len(element)):
                 if element[letter] == "\"":
