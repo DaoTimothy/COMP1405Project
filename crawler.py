@@ -1,6 +1,5 @@
 import webdev
 
-links = {}
 titleindex = 0
 wordsindex = 1
 linkindex = 2
@@ -19,7 +18,10 @@ def crawl(seed):
         contents = webdev.read_url(currentPage)
         words = contents.split("<")
         content = readhtml(words)
-        print(content[titleindex])
+        print("At Page", content[titleindex])
+
+        
+
         for link in content[linkindex]:
             absolutelink = buildlink(currentPage, link)
             if absolutelink not in readPages and absolutelink not in unreadDict:
@@ -67,6 +69,4 @@ def buildlink(currenturl, string):
     return string
     
 temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
-addlink(links, temp)
-print(links)
 print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
