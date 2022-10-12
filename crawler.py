@@ -1,14 +1,18 @@
 import webdev
+import os
 
 titleindex = 0
 wordsindex = 1
 linkindex = 2
 
 def crawl(seed):
+    if not os.path.exists("PageResults"):
+        os.mkdir("PageResults")
     totalPages = 0
     unreadPages = []
     unreadDict = {}
     readPages = {}
+    linkRelations = {}
     unreadPages.append(seed)
     unreadDict[seed] = 0
     while len(unreadPages) > 0:
@@ -19,15 +23,18 @@ def crawl(seed):
         words = contents.split("<")
         content = readhtml(words)
         print("At Page", content[titleindex])
-
-        
-
+        outgoinglinks = {}
         for link in content[linkindex]:
             absolutelink = buildlink(currentPage, link)
+            outgoinglinks[absolutelink] = 0
+            print(absolutelink)
             if absolutelink not in readPages and absolutelink not in unreadDict:
                 unreadPages.append(absolutelink)
                 unreadDict[absolutelink] = 0
+        linkRelations[currentPage] = outgoinglinks
         totalPages += 1
+        save(content)
+    print(linkRelations)
     return totalPages
 
 def readhtml(list):
@@ -67,6 +74,9 @@ def buildlink(currenturl, string):
         result += string[1:len(string)]
         return result
     return string
-    
+
+def save(content):
+    file = open("PageResults/"+content[titleindex], "w")
+    file.close()
 temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
 print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
