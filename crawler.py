@@ -8,32 +8,40 @@ linkindex = 2
 def crawl(seed):
     if not os.path.exists("PageResults"):
         os.mkdir("PageResults")
+
+    #variables required for crawl
     totalPages = 0
-    unreadPages = []
+    unreadLinks = []
     unreadDict = {}
     readPages = {}
-    linkRelations = {}
-    unreadPages.append(seed)
+    unreadLinks.append(seed)
     unreadDict[seed] = 0
-    while len(unreadPages) > 0:
-        currentPage = unreadPages.pop(0)
-        del unreadDict[currentPage]
-        addlink(readPages, currentPage)  
-        contents = webdev.read_url(currentPage)
+
+    #extra information
+    incomingLinks = {}
+
+    while len(unreadLinks) > 0:
+        currentLink = unreadLinks.pop(0)
+        del unreadDict[currentLink]
+        addlink(readPages, currentLink)  
+        contents = webdev.read_url(currentLink)
         words = contents.split("<")
         content = readhtml(words)
         print("At Page", content[titleindex])
-        outgoinglinks = []
+
         for link in content[linkindex]:
-            absolutelink = buildlink(currentPage, link)
+            if link not in incomingLinks:
+                incomingLinks[link] = []
+            incomingLinks[link].append(currentLink)
+            outgoinglinks = []
+            absolutelink = buildlink(currentLink, link)
             outgoinglinks.append(absolutelink)
             #print(absolutelink)
             if absolutelink not in readPages and absolutelink not in unreadDict:
-                unreadPages.append(absolutelink)
+                unreadLinks.append(absolutelink)
                 unreadDict[absolutelink] = 0
-        linkRelations[currentPage] = outgoinglinks
         totalPages += 1
-        save(content, outgoinglinks)
+        save(currentLink, content, outgoinglinks)
     return totalPages
 
 def readhtml(list):
@@ -74,12 +82,32 @@ def buildlink(currenturl, string):
         return result
     return string
 
-def save(content, outgoinglinks):
-    file = open("PageResults/"+content[titleindex], "w")
+def save(currentLink, content, outgoinglinks):
+    directory = build_directory(currentLink)
+    print(directory)
+    file = open("PageResults/"+directory, "w")
     file.write(str(len(outgoinglinks))+" Outgoing Links")
     for link in outgoinglinks:
         file.write("\n"+link)
     file.write(content[wordsindex])
     file.close()
+
+def build_directory(currentLink):
+    linkParts = currentLink.split(":")
+    directory = ""
+    for part in linkParts:
+        directory += part
+    currentDirectory = "PageResults"
+    folders = directory.split("/")
+    for i in range(len(folders)-1):
+        
+        if folders[i] == "":
+            continue
+        elif not os.path.exists(currentDirectory+"/"+folders[i]):
+            os.mkdir(currentDirectory+"/"+folders[i])
+            print("Made " + folders[i])
+        currentDirectory += "/" + folders[i]
+    return directory[0:len(directory)-5]+".txt"
+
 temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
 print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))

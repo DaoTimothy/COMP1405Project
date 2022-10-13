@@ -1,0 +1,23 @@
+clear data before crawling
+Parse the html
+    extract links
+    extract words
+organize the data
+compute the data
+    incoming links
+    outgoing links
+    term freqency
+    idf
+    tf-idf values
+    pagerank
+save the data to files/directories
+
+implement the search data functions
+
+how to take in a phrase/search query
+how to compute the tf-idf of the search query
+how to get the idf of the search query
+how to get the tf of the search query
+how to compute cosine similarity
+how to find the seach score for all documents
+how to sort the results
