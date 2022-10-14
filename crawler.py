@@ -1,4 +1,3 @@
-from distutils.command.build import build
 import webdev
 import os
 
@@ -52,7 +51,7 @@ def crawl(seed):
 
         for link in content[linkindex]:
             absoluteLink = buildlink(currentLink, link)
-            
+
             outgoingLinks = []
             outgoingLinks.append(absoluteLink)
 
