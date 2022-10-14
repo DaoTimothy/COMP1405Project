@@ -6,24 +6,42 @@ titleindex = 0
 wordsindex = 1
 linkindex = 2
 
+def addend(list, dict, value):
+	if value not in dict:
+		dict[value] = 1
+	else:
+		dict[value] += 1
+	list.append(value)
+	
+def removestart(list, dict):
+	if len(list) == 0:
+		return None
+	dict[list[0]] -= 1
+	if dict[list[0]] == 0:
+		del dict[list[0]]
+	return list.pop(0)
+	
+def containshash(dict, value):
+	if value in dict:
+		return True
+	return False	
+
 def crawl(seed):
     if not os.path.exists("PageResults"):
         os.mkdir("PageResults")
 
     #variables required for crawl
     totalPages = 0
-    unreadLinks = []
+    unreadList = []
     unreadDict = {}
     readPages = {}
-    unreadLinks.append(seed)
-    unreadDict[seed] = 0
+    addend(unreadList, unreadDict, seed)
 
     #extra information
     incomingLinks = {}
 
-    while len(unreadLinks) > 0:
-        currentLink = unreadLinks.pop(0)
-        del unreadDict[currentLink]
+    while len(unreadList) > 0:
+        currentLink = removestart(unreadList, unreadDict)
         addlink(readPages, currentLink)  
         contents = webdev.read_url(currentLink)
         words = contents.split("<")
@@ -38,9 +56,8 @@ def crawl(seed):
             incomingLinks[absolutelink].append(currentLink)
             outgoinglinks.append(absolutelink)
             #print(absolutelink)
-            if absolutelink not in readPages and absolutelink not in unreadDict:
-                unreadLinks.append(absolutelink)
-                unreadDict[absolutelink] = 0
+            if absolutelink not in readPages and not containshash(unreadDict, absolutelink):
+                addend(unreadList, unreadDict, absolutelink)
         totalPages += 1
         save(currentLink, content, outgoinglinks)
     save_incoming(incomingLinks)
