@@ -34,8 +34,8 @@ def crawl(seed):
             outgoinglinks = []
             absolutelink = buildlink(currentLink, link)
             if absolutelink not in incomingLinks:
-                incomingLinks[link] = []
-            incomingLinks[link].append(currentLink)
+                incomingLinks[absolutelink] = []
+            incomingLinks[absolutelink].append(currentLink)
             outgoinglinks.append(absolutelink)
             #print(absolutelink)
             if absolutelink not in readPages and absolutelink not in unreadDict:
@@ -110,14 +110,32 @@ def build_directory(currentLink):
     return directory[0:len(directory)-5]+".txt"
 
 def save_incoming(incomingLinks):
-    print(incomingLinks)
     for page in incomingLinks:
         directory = build_directory(page)
         #print(directory)
         file = open("PageResults/"+directory, "a")
-        file.write(str(len(incomingLinks[page]))+" Incoming Links+\n")
-        for incominglink in incomingLinks[page]:
-            file.write(incominglink+"\n")
+        file.write(listtostring(incomingLinks[page]))
     return
+
+def dicttojson(jsonlist):
+    result = "{"
+    for key in jsonlist:
+        result += "\""
+        result += key
+        result += "\":\""
+        result += jsonlist[key]
+        result += ","
+    result = result[0:len(result)-1]
+    result += "}"
+    return result
+
+def listtostring(list):
+    result = "["
+    for item in list:
+        result += "\"" + item + "\", "
+    result = result[0:len(result)-2]
+    result += "]"
+    return result
+
 temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
 print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
