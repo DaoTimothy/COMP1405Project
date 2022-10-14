@@ -42,24 +42,29 @@ def crawl(seed):
 
     while len(unreadList) > 0:
         currentLink = removestart(unreadList, unreadDict)
-        addlink(readPages, currentLink)  
+        readPages[currentLink] = 0
+
         contents = webdev.read_url(currentLink)
-        words = contents.split("<")
-        content = readhtml(words)
+        htmlElements = contents.split("<")
+        content = readhtml(htmlElements)
+
         print("At Page", content[titleindex])
 
         for link in content[linkindex]:
-            outgoinglinks = []
-            absolutelink = buildlink(currentLink, link)
-            if absolutelink not in incomingLinks:
-                incomingLinks[absolutelink] = []
-            incomingLinks[absolutelink].append(currentLink)
-            outgoinglinks.append(absolutelink)
+            absoluteLink = buildlink(currentLink, link)
+            
+            outgoingLinks = []
+            outgoingLinks.append(absoluteLink)
+
+            if absoluteLink not in incomingLinks:
+                incomingLinks[absoluteLink] = []
+            incomingLinks[absoluteLink].append(currentLink)
+            
             #print(absolutelink)
-            if absolutelink not in readPages and not containshash(unreadDict, absolutelink):
-                addend(unreadList, unreadDict, absolutelink)
+            if absoluteLink not in readPages and not containshash(unreadDict, absoluteLink):
+                addend(unreadList, unreadDict, absoluteLink)
         totalPages += 1
-        save(currentLink, content, outgoinglinks)
+        save(currentLink, content, outgoingLinks)
     save_incoming(incomingLinks)
     return totalPages
 
@@ -83,12 +88,6 @@ def readhtml(list):
     result[linkindex] = links
     return result
 
-#takes in a dictionary of links and a list representing a url that has been split at each.
-def addlink(dict, string):
-    if string not in dict:
-        dict[string] = 0
-    return
-
 def buildlink(currenturl, string):
     if string[0] == ".":
         urlparts = currenturl.split("/")
@@ -101,10 +100,10 @@ def buildlink(currenturl, string):
         return result
     return string
 
-def save(currentLink, content, outgoinglinks):
+def save(currentLink, content, outgoingLinks):
     directory = build_directory(currentLink)
     file = open("PageResults/"+directory, "w")
-    file.write(listtostring(outgoinglinks))
+    file.write(listtostring(outgoingLinks))
     file.write("\n"+dicttojson(rawtexttodict(content[wordsindex]))+"\n")
     file.close()
 
