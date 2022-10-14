@@ -6,8 +6,9 @@ wordsindex = 1
 linkindex = 2	
 
 def crawl(seed):
-    if not os.path.exists("PageResults"):
-        os.mkdir("PageResults")
+    if os.path.exists("PageResults"):
+        deleteFolder("PageResults")
+    os.mkdir("PageResults")
 
     #variables required for crawl
     totalPages = 0
@@ -46,6 +47,18 @@ def crawl(seed):
         savePage(currentLink, content, outgoingLinks)
     saveIncomingLinks(incomingLinks)
     return totalPages
+
+def deleteFolder(string):
+    if os.path.exists(string):
+        files = os.listdir(string)
+        for file in files:
+            absolutePath = string+"/"+file
+            if os.path.isdir(absolutePath):
+                deleteFolder(absolutePath)
+            elif os.path.isfile(absolutePath):
+                os.remove(absolutePath)
+    os.rmdir(string)
+    return
 
 def addend(list, dict, value):
 	if value not in dict:
