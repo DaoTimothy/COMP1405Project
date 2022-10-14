@@ -87,10 +87,8 @@ def buildlink(currenturl, string):
 def save(currentLink, content, outgoinglinks):
     directory = build_directory(currentLink)
     file = open("PageResults/"+directory, "w")
-    file.write(str(len(outgoinglinks))+" Outgoing Links")
-    for link in outgoinglinks:
-        file.write("\n"+link)
-    file.write(content[wordsindex])
+    file.write(listtostring(outgoinglinks))
+    file.write("\n"+dicttojson(rawtexttodict(content[wordsindex]))+"\n")
     file.close()
 
 def build_directory(currentLink):
@@ -117,14 +115,25 @@ def save_incoming(incomingLinks):
         file.write(listtostring(incomingLinks[page]))
     return
 
+def rawtexttodict(string):
+    result = {}
+    cleaned = string.replace("\n", " ")
+    words = cleaned.split(" ")
+    for word in words:
+        if word not in result:
+            result[word] = 1
+        else:
+            result[word] += 1
+    return result
+
 def dicttojson(jsonlist):
     result = "{"
     for key in jsonlist:
         result += "\""
         result += key
         result += "\":\""
-        result += jsonlist[key]
-        result += ","
+        result += str(jsonlist[key])
+        result += "\","
     result = result[0:len(result)-1]
     result += "}"
     return result
