@@ -1,4 +1,5 @@
 import os
+import math
 
 def get_outgoing_links(URL):
     file = openFile(URL)
@@ -22,7 +23,29 @@ def get_page_rank(URL):
     return
 
 def get_idf(word):
-    return
+    file = open("master.txt", "r")
+    totalDocs = file.readline()
+    #visit every page and see if this word is in that dictionary.
+    numerator = totalDocs
+    denominator = 1 + checkFiles("PageResults", word, 0)
+    return math.log(int(numerator)/denominator, 2)
+
+def checkFiles(base, word, total):
+    if os.path.exists(base):
+        files = os.listdir(base)
+        for file in files:
+            absolutePath = base+"/"+file
+            if os.path.isdir(absolutePath):
+                checkFiles(absolutePath, word, total)
+            elif os.path.isfile(absolutePath):
+                tempfile = open(absolutePath, "r")
+                line = ""
+                for i in range(2):
+                    line = tempfile.readline()
+                words = jsontodict(line)
+                if word in words:
+                    total += 1
+    return total
 
 def get_tf(URL, word):
     file = openFile(URL)
@@ -104,3 +127,4 @@ print("Out:", get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/t
 print("In:", get_incoming_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
 
 print("TF:", get_tf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html", "coconut"))
+print("IDF:", get_idf("coconut"))
