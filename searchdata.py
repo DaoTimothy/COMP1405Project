@@ -62,7 +62,7 @@ def get_tf(URL, word):
     return int(words[word]) / numWords
 
 def get_tf_idf(URL, word):
-    return
+    return math.log(1+get_tf(URL, word) * get_idf(word))
 
 def openFile(URL):
     linkParts = URL.split(":")
@@ -128,3 +128,4 @@ print("In:", get_incoming_links("http://people.scs.carleton.ca/~davidmckenney/ti
 
 print("TF:", get_tf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html", "coconut"))
 print("IDF:", get_idf("coconut"))
+print("TFIDF:", get_tf_idf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html", "coconut"))
