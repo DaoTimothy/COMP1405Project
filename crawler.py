@@ -117,6 +117,7 @@ def savePage(currentLink, content, outgoingLinks):
     file = open("PageResults/"+directory, "w")
     file.write(listtostring(outgoingLinks))
     file.write("\n"+dicttojson(rawtexttodict(content[wordsindex]))+"\n")
+    file.write(listtostring(content[wordsindex].replace("\n", " ").split())+"\n")
     file.close()
 
 def buildDirectory(currentLink):
