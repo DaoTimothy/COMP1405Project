@@ -7,7 +7,12 @@ def get_outgoing_links(URL):
     return stringToList(line)
 
 def get_incoming_links(URL):
-    return
+    file = openFile(URL)
+    line = ""
+    for i in range(3):
+        line = file.readline()
+    closeFile(file)
+    return stringToList(line)
 
 def get_page_rank(URL):
     return
@@ -51,4 +56,6 @@ def stringToList(string):
             item += char
     return result
 
-print(get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
+print("Out: ", get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-3.html"))
+
+print("In: ", get_incoming_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-3.html"))

@@ -29,11 +29,11 @@ def crawl(seed):
         content = readHtml(htmlElements)
 
         print("At Page", content[titleindex])
+        outgoingLinks = []
 
         for link in content[linkindex]:
             absoluteLink = buildLink(currentLink, link)
-
-            outgoingLinks = []
+            
             outgoingLinks.append(absoluteLink)
 
             if absoluteLink not in incomingLinks:
