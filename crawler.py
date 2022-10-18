@@ -48,6 +48,7 @@ def crawl(seed):
     saveIncomingLinks(incomingLinks)
     file = open("master.txt", "w")
     file.write(str(totalPages))
+    calcpagerank(file)
     return totalPages
 
 def deleteFolder(string):
@@ -176,6 +177,9 @@ def listtostring(list):
     result = result[0:len(result)-2]
     result += "]"
     return result
+
+def savepagerank(str):
+    return
 
 temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
 print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
