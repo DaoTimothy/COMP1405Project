@@ -28,7 +28,7 @@ def get_idf(word):
     #visit every page and see if this word is in that dictionary.
     numerator = totalDocs
     denominator = 1 + checkFiles("PageResults", word, 0)
-    return math.log(int(numerator)/denominator, 2)
+    return math.log(int(numerator)/int(denominator), 2)
 
 def checkFiles(base, word, total):
     if os.path.exists(base):
@@ -36,7 +36,7 @@ def checkFiles(base, word, total):
         for file in files:
             absolutePath = base+"/"+file
             if os.path.isdir(absolutePath):
-                checkFiles(absolutePath, word, total)
+                total += checkFiles(absolutePath, word, total)
             elif os.path.isfile(absolutePath):
                 tempfile = open(absolutePath, "r")
                 line = ""
@@ -122,10 +122,13 @@ def jsontodict(string):
             passedColon = False
     return result
 
+"""
 print("Out:", get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
 
 print("In:", get_incoming_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
 
 print("TF:", get_tf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html", "coconut"))
 print("IDF:", get_idf("coconut"))
+
 print("TFIDF:", get_tf_idf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html", "coconut"))
+"""

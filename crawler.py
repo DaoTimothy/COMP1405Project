@@ -48,7 +48,6 @@ def crawl(seed):
     saveIncomingLinks(incomingLinks)
     file = open("master.txt", "w")
     file.write(str(totalPages))
-    calcpagerank(file)
     return totalPages
 
 def deleteFolder(string):
