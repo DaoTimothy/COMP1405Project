@@ -1,0 +1,4 @@
+STUFF YOU NEED TO DO BEFORE HANDING IN THE PROJECT (other than needing to implement the needed functionality)
+fix all the variable names and function names to fit camelCase
+organize functions into modules to help with organization
+fix the readhtml function (currently making false assumptions)

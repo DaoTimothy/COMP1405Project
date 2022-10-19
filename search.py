@@ -1,9 +1,10 @@
+from crawler import jsontodict
 import searchdata
 import math
+import os
 
 def search(phrase, boost):
-    query = queryvector(phrase)
-    print(query)
+    queryVec = queryvector(phrase)
     return
 
 def queryvector(phrase):
@@ -28,4 +29,27 @@ def rawtexttodict(string):
             result[word] += 1
     return result
 
+def idklol(string):
+    docDict = {}
+    if os.path.exists(string):
+        files = os.listdir(string)
+        for file in files:
+            absolutePath = string+"/"+file
+            if os.path.isdir(absolutePath):
+                
+                docDict[absolutePath] = generateDocVector(absolutePath)
+            elif os.path.isfile(absolutePath):
+                os.remove(absolutePath)
+    os.rmdir(string)
+    return
+
+def generateDocVector(absolutePath, queryList):
+    file = open(absolutePath, "r")
+    for i in range(6):
+        line = file.readline()
+    tf_idfDict = jsontodict(line)
+    docVector = []
+    for word in queryList:
+        docVector.append(tf_idfDict[word])
+    return docVector
 search("coconut apple", False)

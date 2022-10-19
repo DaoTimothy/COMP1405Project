@@ -23,7 +23,7 @@ def get_page_rank(URL):
     return
 
 def get_idf(word):
-    file = open("master.txt", "r")
+    file = open("PageResults/master.txt", "r")
     totalDocs = file.readline()
     #visit every page and see if this word is in that dictionary.
     numerator = totalDocs

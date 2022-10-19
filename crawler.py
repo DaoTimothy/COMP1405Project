@@ -100,6 +100,7 @@ def containshash(dict, value):
 def readHtml(list):
     result = ["", "", ""]
     links = []
+    #print(list)
     for element in list:
         if len(element) == 0:
             continue
