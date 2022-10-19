@@ -1,4 +1,5 @@
 import webdev
+import math
 import os
 
 titleindex = 0
@@ -15,6 +16,7 @@ def crawl(seed):
     unreadList = []
     unreadDict = {}
     readPages = {}
+    allWords = {}
     addend(unreadList, unreadDict, seed)
 
     #extra information
@@ -30,6 +32,7 @@ def crawl(seed):
 
         print("At Page", content[titleindex])
         outgoingLinks = []
+        tfDict = {}
 
         for link in content[linkindex]:
             absoluteLink = buildLink(currentLink, link)
@@ -43,11 +46,24 @@ def crawl(seed):
             #print(absolutelink)
             if absoluteLink not in readPages and not containshash(unreadDict, absoluteLink):
                 addend(unreadList, unreadDict, absoluteLink)
+        #print(content[wordsindex])
+        wordDict = rawtexttodict(content[wordsindex])
+        wordList = content[wordsindex].replace("\n", " ").split()
+        for word in wordDict:
+            if word not in allWords:
+                allWords[word] = 1
+            tfDict[word] = wordDict[word]/len(wordList)
         totalPages += 1
-        savePage(currentLink, content, outgoingLinks)
-    saveIncomingLinks(incomingLinks)
+        savePage(currentLink, outgoingLinks, wordDict, wordList, tfDict)
+    saveInfoAfterCrawl(incomingLinks)
     file = open("master.txt", "w")
-    file.write(str(totalPages))
+    file.write(str(totalPages)+"\n")
+    idfDict = {}
+    for word in allWords:
+        idfDict[word] = calcIdf(word, totalPages)
+    file.write(dicttojson(idfDict)+"\n")
+    file.close()
+
     return totalPages
 
 def deleteFolder(string):
@@ -114,12 +130,13 @@ def buildLink(currenturl, string):
         return result
     return string
 
-def savePage(currentLink, content, outgoingLinks):
+def savePage(currentLink, outgoingLinks, wordDict, wordList, tfDict):
     directory = buildDirectory(currentLink)
     file = open("PageResults/"+directory, "w")
-    file.write(listtostring(outgoingLinks))
-    file.write("\n"+dicttojson(rawtexttodict(content[wordsindex]))+"\n")
-    file.write(listtostring(content[wordsindex].replace("\n", " ").split())+"\n")
+    file.write(listtostring(outgoingLinks)+"\n")
+    file.write(dicttojson(wordDict)+"\n")
+    file.write(listtostring(wordList)+"\n")
+    file.write(dicttojson(tfDict)+"\n")
     file.close()
 
 def buildDirectory(currentLink):
@@ -138,7 +155,7 @@ def buildDirectory(currentLink):
         currentDirectory += "/" + folders[i]
     return directory[0:len(directory)-5]+".txt"
 
-def saveIncomingLinks(incomingLinks):
+def saveInfoAfterCrawl(incomingLinks):
     for page in incomingLinks:
         directory = buildDirectory(page)
         #print(directory)
@@ -175,6 +192,56 @@ def listtostring(list):
         result += "\"" + item + "\", "
     result = result[0:len(result)-2]
     result += "]"
+    return result
+
+
+def calcIdf(word, totalDocs):
+    #visit every page and see if this word is in that dictionary.
+    numerator = totalDocs
+    denominator = 1 + checkFiles("PageResults", word, 0)
+    return math.log(int(numerator)/int(denominator), 2)
+
+def checkFiles(base, word, total):
+    if os.path.exists(base):
+        files = os.listdir(base)
+        for file in files:
+            absolutePath = base+"/"+file
+            if os.path.isdir(absolutePath):
+                total += checkFiles(absolutePath, word, total)
+            elif os.path.isfile(absolutePath):
+                tempfile = open(absolutePath, "r")
+                line = ""
+                for i in range(2):
+                    line = tempfile.readline()
+                words = jsontodict(line)
+                if word in words:
+                    total += 1
+    return total
+
+def jsontodict(string):
+    result = {}
+    getkey = False
+    getvalue = False
+    passedColon = False
+    key = ""
+    value = ""
+    
+    for character in string:
+        if character == ":":
+            passedColon = True
+        if character == '"':
+            getkey = not getkey
+            getvalue = not getvalue
+        elif getkey == True and passedColon == False:
+            key += character
+        elif getvalue == True and passedColon == True:
+            value += character
+        elif character == ",":
+            if key not in result:
+                result[key] = value
+            key = ""
+            value = ""
+            passedColon = False
     return result
 
 def savepagerank(str):
