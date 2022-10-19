@@ -55,15 +55,14 @@ def crawl(seed):
             tfDict[word] = wordDict[word]/len(wordList)
         totalPages += 1
         savePage(currentLink, outgoingLinks, wordDict, wordList, tfDict)
-    saveInfoAfterCrawl(incomingLinks)
-    file = open("master.txt", "w")
+    file = open("PageResults/master.txt", "w")
     file.write(str(totalPages)+"\n")
     idfDict = {}
     for word in allWords:
         idfDict[word] = calcIdf(word, totalPages)
     file.write(dicttojson(idfDict)+"\n")
     file.close()
-
+    saveInfoAfterCrawl(incomingLinks, idfDict)
     return totalPages
 
 def deleteFolder(string):
@@ -155,12 +154,22 @@ def buildDirectory(currentLink):
         currentDirectory += "/" + folders[i]
     return directory[0:len(directory)-5]+".txt"
 
-def saveInfoAfterCrawl(incomingLinks):
+def saveInfoAfterCrawl(incomingLinks, idfDict):
     for page in incomingLinks:
         directory = buildDirectory(page)
         #print(directory)
+        file = open("PageResults/"+directory, "r")
+        for i in range(4):
+            line = file.readline()
+        tfDict = jsontodict(line)
+        tf_idfDict = {}
+        for word in tfDict:
+            tf_idfDict[word] = math.log(1+float(tfDict[word])) * idfDict[word]
+        file.close()
         file = open("PageResults/"+directory, "a")
-        file.write(listtostring(incomingLinks[page]))
+        file.write(listtostring(incomingLinks[page])+"\n")
+        file.write(dicttojson(tf_idfDict))
+        file.close()
     return
 
 def rawtexttodict(string):
