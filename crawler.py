@@ -104,13 +104,13 @@ def readHtml(list):
     for element in list:
         if len(element) == 0:
             continue
-        elif element[0:6] == "title>":
-            result[titleindex] = element[6:len(element)]
-        elif element[0:2] == "p>":
-            result[wordsindex] = element[2:len(element)]
-        elif element[0:8] == "a href=\"":
+        elif element[0:6] == "title>" or element[0:6] == "title ":
+            result[titleindex] = element[element.index(">")+1:len(element)]
+        elif element[0:2] == "p " or element[0:2] == "p>":
+            result[wordsindex] = element[element.index(">")+1:len(element)]
+        elif "href=\"" in element:
             link = ""
-            for letter in range(8,len(element)):
+            for letter in range(element.index("href=\"")+6,len(element)):
                 if element[letter] == "\"":
                     break
                 link += element[letter]
