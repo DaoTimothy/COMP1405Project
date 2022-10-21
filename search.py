@@ -5,6 +5,7 @@ import os
 
 def search(phrase, boost):
     queryVec = queryvector(phrase)
+    print(queryVec)
     return
 
 def queryvector(phrase):

@@ -2,77 +2,55 @@ import os
 import math
 
 def get_outgoing_links(URL):
-    file = openFile(URL)
-    if file == None:
-        return None
-    line = file.readline()
-    closeFile(file)
-    return stringToList(line)
+    directory = openPage(URL)
+    if directory == None:
+        return 0
+    outgoingLinks = os.listdir(directory+"/outgoing")
+    for i in range(len(outgoingLinks)):
+        outgoingLinks[i] = outgoingLinks[i].replace("-", "/").replace("http", "http:")
+    return outgoingLinks
 
 def get_incoming_links(URL):
-    file = openFile(URL)
-    if file == None:
-        return None
-    line = ""
-    for i in range(4):
-        line = file.readline()
-    closeFile(file)
-    return stringToList(line)
+    directory = openPage(URL)
+    if directory == None:
+        return 0
+    incomingLinks = os.listdir(directory+"/incoming")
+    for i in range(len(incomingLinks)):
+        incomingLinks[i] = incomingLinks[i].replace("-", "/").replace("http", "http:")
+    return incomingLinks
 
 def get_page_rank(URL):
-    return
+    directory = openPage(URL)
+    if directory == None:
+        return 0
+    file = open(directory+"/PageRank", "r")
+    return float(file.readline())
 
 def get_idf(word):
-    file = open("PageResults/master.txt", "r")
-    totalDocs = file.readline()
-    #visit every page and see if this word is in that dictionary.
-    numerator = totalDocs
-    denominator = 1 + checkFiles("PageResults", word, 0)
-    return math.log(int(numerator)/int(denominator), 2)
-
-def checkFiles(base, word, total):
-    if os.path.exists(base):
-        files = os.listdir(base)
-        for file in files:
-            absolutePath = base+"/"+file
-            if os.path.isdir(absolutePath):
-                total += checkFiles(absolutePath, word, total)
-            elif os.path.isfile(absolutePath):
-                tempfile = open(absolutePath, "r")
-                line = ""
-                for i in range(2):
-                    line = tempfile.readline()
-                words = jsontodict(line)
-                if word in words:
-                    total += 1
-    return total
+    return
 
 def get_tf(URL, word):
-    file = openFile(URL)
-    if file == None:
+    directory = openPage(URL)
+    if directory == None:
         return 0
-    line = ""
-    for i in range(2):
-        line = file.readline()
-    words = jsontodict(line)
-    if word not in words:
-        return 0
-    line = file.readline()
-    numWords = len(stringToList(line))
-    return int(words[word]) / numWords
+    file = open(directory+"/tf/"+word, "r")
+    return float(file.readline())
 
 def get_tf_idf(URL, word):
-    return math.log(1+get_tf(URL, word) * get_idf(word))
+    directory = openPage(URL)
+    if directory == None:
+        return 0
+    file = open(directory+"/tf_idf/"+word, "r")
+    return float(file.readline())
 
-def openFile(URL):
+def openPage(URL):
     linkParts = URL.split(":")
     directory = ""
     for part in linkParts:
         directory += part
-    path = "PageResults/"+directory[0:len(directory)-5]+".txt"
+    path = "PageResults/"+directory[0:len(directory)-5]
     if os.path.exists(path):
-        file = open(path, "r")
-        return file
+        return path
     return None
 
 def closeFile(file):
@@ -96,39 +74,12 @@ def stringToList(string):
             item += char
     return result
 
-def jsontodict(string):
-    result = {}
-    getkey = False
-    getvalue = False
-    passedColon = False
-    key = ""
-    value = ""
-    
-    for character in string:
-        if character == ":":
-            passedColon = True
-        if character == '"':
-            getkey = not getkey
-            getvalue = not getvalue
-        elif getkey == True and passedColon == False:
-            key += character
-        elif getvalue == True and passedColon == True:
-            value += character
-        elif character == ",":
-            if key not in result:
-                result[key] = value
-            key = ""
-            value = ""
-            passedColon = False
-    return result
 
-"""
-print("Out:", get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
+print("Out:", get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-1.html"))
 
-print("In:", get_incoming_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
+print("In:", get_incoming_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-1.html"))
 
-print("TF:", get_tf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html", "coconut"))
+print("TF:", get_tf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-1.html", "coconut"))
 print("IDF:", get_idf("coconut"))
 
-print("TFIDF:", get_tf_idf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html", "coconut"))
-"""
+print("TFIDF:", get_tf_idf("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-1.html", "coconut"))

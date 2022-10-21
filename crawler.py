@@ -65,7 +65,6 @@ def crawl(seed):
     file.close()
     pageRankList = pagerank.pagerank(incomingLinks)[0]
     mappingDict = pagerank.idmapping(incomingLinks)
-    print(mappingDict)
     saveInfoAfterCrawl(incomingLinks, idfDict, pageRankList, mappingDict)
     return totalPages
 

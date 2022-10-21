@@ -1,19 +1,7 @@
-STUFF YOU NEED TO DO BEFORE HANDING IN THE PROJECT (other than needing to implement the needed functionality)
+STUFF YOU NEED TO DO BEFORE HANDING IN THE PROJECT
+cosine similarity
+search
+quicksort results
+fix idf values
 fix all the variable names and function names to fit camelCase
 organize functions into modules to help with organization
-represent each page as a folder 
-    within that page folder:
-        tf folder
-            file for each word in the page and the contents is just the tf value for that word
-            ex: 
-            "apple.txt" : 0.5
-        tf-idf folder   
-            same concept
-        incoming links folder
-            file for each incominglink
-        outgoing links folder
-            file for each outgoinglink
-        file
-            PageRank value
-    (We should be able to distinguish normal directories from page directories by if the directory contains a "PageRank.txt" file.)
-
