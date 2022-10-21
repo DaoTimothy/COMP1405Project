@@ -54,16 +54,11 @@ def creatematrix(idmap,incominglinksdict):
         #Initial transition probability matrix (dividing rows by # of 1s):
         for i in range(len(row)):
             if row[i]==1:
-
                 row[i]=1/yescount
+            row[i] = row[i]*(1-alpha)+ alpha/totalpgs
+         
 
-        #Scaled Adjacency Matrix (1-alpha * adjacency)
-        for i in range(len(row)):
-            row[i] = row[i]*(1-alpha)
-                
-        #Adjacency Matrix after adding alpha/N to each entry
-        for i in range(len(row)):
-            row[i]=row[i] + alpha/totalpgs
+        
 
         yescount=0
         notcount=0

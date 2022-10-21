@@ -1,7 +1,8 @@
+from cgi import print_directory
 import webdev
 import math
 import os
-
+import pagerank
 titleindex = 0
 wordsindex = 1
 linkindex = 2	
@@ -54,7 +55,7 @@ def crawl(seed):
                 allWords[word] = 1
             tfDict[word] = wordDict[word]/len(wordList)
         totalPages += 1
-        savePage(currentLink, outgoingLinks, wordDict, wordList, tfDict)
+        savePage(currentLink, outgoingLinks, wordDict, tfDict)
     file = open("PageResults/master.txt", "w")
     file.write(str(totalPages)+"\n")
     idfDict = {}
@@ -62,7 +63,10 @@ def crawl(seed):
         idfDict[word] = calcIdf(word, totalPages)
     file.write(dicttojson(idfDict)+"\n")
     file.close()
-    saveInfoAfterCrawl(incomingLinks, idfDict)
+    pageRankList = pagerank.pagerank(incomingLinks)[0]
+    mappingDict = pagerank.idmapping(incomingLinks)
+    print(mappingDict)
+    saveInfoAfterCrawl(incomingLinks, idfDict, pageRankList, mappingDict)
     return totalPages
 
 def deleteFolder(string):
@@ -130,14 +134,23 @@ def buildLink(currenturl, string):
         return result
     return string
 
-def savePage(currentLink, outgoingLinks, wordDict, wordList, tfDict):
-    directory = buildDirectory(currentLink)
-    file = open("PageResults/"+directory, "w")
-    file.write(listtostring(outgoingLinks)+"\n")
-    file.write(dicttojson(wordDict)+"\n")
-    file.write(listtostring(wordList)+"\n")
-    file.write(dicttojson(tfDict)+"\n")
-    file.close()
+def savePage(currentLink, outgoingLinks, wordDict, tfDict):
+    directory = "PageResults/"+buildDirectory(currentLink)
+    tfDir = directory+"/tf"
+    os.mkdir(tfDir)
+    for word in wordDict:
+        if word != "":
+            file = open(tfDir+"/"+word, "w")
+            file.write(str(tfDict[word]))
+            file.close()
+   
+    outDir = directory+"/outgoing"
+    os.mkdir(outDir)
+    for link in outgoingLinks:
+        temp = link.replace(":", "").replace("/", "-")
+        file = open(outDir+"/"+temp, "w")
+        file.close()
+    return
 
 def buildDirectory(currentLink):
     linkParts = currentLink.split(":")
@@ -149,26 +162,43 @@ def buildDirectory(currentLink):
     for i in range(len(folders)):
         if folders[i] == "":
             continue
-        elif not os.path.exists(currentDirectory+"/"+folders[i]):
-            os.mkdir(currentDirectory+"/"+folders[i])
+        elif not (os.path.exists(currentDirectory+"/"+folders[i]) or os.path.exists(currentDirectory+"/"+folders[i][0:len(folders[i])-5])):
+            if folders[i][len(folders[i])-5:len(folders[i])] == ".html":
+                os.mkdir(currentDirectory+"/"+folders[i][0:len(folders[i])-5])
+            else:
+                os.mkdir(currentDirectory+"/"+folders[i])
         currentDirectory += "/" + folders[i]
     return directory[0:len(directory)-5]
 
-def saveInfoAfterCrawl(incomingLinks, idfDict):
+def saveInfoAfterCrawl(incomingLinks, idfDict, pageRankList, mappingDict):
     for page in incomingLinks:
-        directory = buildDirectory(page)
+        directory = "PageResults/"+buildDirectory(page)
         #print(directory)
-        file = open("PageResults/"+directory, "r")
-        for i in range(4):
-            line = file.readline()
-        tfDict = jsontodict(line)
-        tf_idfDict = {}
-        for word in tfDict:
-            tf_idfDict[word] = math.log(1+float(tfDict[word])) * idfDict[word]
-        file.close()
-        file = open("PageResults/"+directory, "a")
-        file.write(listtostring(incomingLinks[page])+"\n")
-        file.write(dicttojson(tf_idfDict))
+        tf_idfDir = directory+"/tf_idf"
+        #print(tf_idfDir)
+        os.mkdir(tf_idfDir)
+        
+        tfDir = directory+"/tf"
+        words = os.listdir(tfDir)
+        #print(words)
+        for word in words:
+            file = open(tfDir+"/"+word, "r")
+            tf = file.readline()
+            file.close()
+            file = open(tf_idfDir+"/"+word, "w")
+            file.write(str(math.log(1+float(tf)) * idfDict[word]))
+            file.close()
+        
+        inDir = directory+"/incoming"
+        os.mkdir(inDir)
+        for link in incomingLinks[page]:
+            temp = link.replace(":", "").replace("/", "-")
+            file = open(inDir+"/"+temp, "w")
+            file.close()
+    for key in mappingDict:
+        directory = "PageResults/"+buildDirectory(mappingDict[key])
+        file = open(directory+"/PageRank", "w")
+        file.write(str(pageRankList[key]))
         file.close()
     return
 
