@@ -236,7 +236,7 @@ def listtostring(list):
 def calcIdf(word, totalDocs):
     #visit every page and see if this word is in that dictionary.
     numerator = totalDocs
-    denominator = 1 + checkFiles("PageResults", word, 0)
+    denominator = 1 + (checkFiles("PageResults", word, 0))
     return math.log(int(numerator)/int(denominator), 2)
 
 def checkFiles(base, word, total):
@@ -244,46 +244,12 @@ def checkFiles(base, word, total):
         files = os.listdir(base)
         for file in files:
             absolutePath = base+"/"+file
-            if os.path.isdir(absolutePath):
-                total += checkFiles(absolutePath, word, total)
-            elif os.path.isfile(absolutePath):
-                tempfile = open(absolutePath, "r")
-                line = ""
-                for i in range(2):
-                    line = tempfile.readline()
-                words = jsontodict(line)
-                if word in words:
-                    total += 1
+            if os.path.isfile(absolutePath) and file == word:
+                print(file, " . ", word)
+                total += 1
+            elif os.path.isdir(absolutePath):
+                total += checkFiles(absolutePath, word, 0)
     return total
-
-def jsontodict(string):
-    result = {}
-    getkey = False
-    getvalue = False
-    passedColon = False
-    key = ""
-    value = ""
-    
-    for character in string:
-        if character == ":":
-            passedColon = True
-        if character == '"':
-            getkey = not getkey
-            getvalue = not getvalue
-        elif getkey == True and passedColon == False:
-            key += character
-        elif getvalue == True and passedColon == True:
-            value += character
-        elif character == ",":
-            if key not in result:
-                result[key] = value
-            key = ""
-            value = ""
-            passedColon = False
-    return result
-
-def savepagerank(str):
-    return
 
 temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
 print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
