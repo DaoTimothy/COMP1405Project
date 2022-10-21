@@ -146,14 +146,13 @@ def buildDirectory(currentLink):
         directory += part
     currentDirectory = "PageResults"
     folders = directory.split("/")
-    for i in range(len(folders)-1):
-        
+    for i in range(len(folders)):
         if folders[i] == "":
             continue
         elif not os.path.exists(currentDirectory+"/"+folders[i]):
             os.mkdir(currentDirectory+"/"+folders[i])
         currentDirectory += "/" + folders[i]
-    return directory[0:len(directory)-5]+".txt"
+    return directory[0:len(directory)-5]
 
 def saveInfoAfterCrawl(incomingLinks, idfDict):
     for page in incomingLinks:
