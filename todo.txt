@@ -1,8 +1,6 @@
 STUFF YOU NEED TO DO BEFORE HANDING IN THE PROJECT
 
 search:
-    query vector
-    document vector
     cosine similarity
     boost/noboost
     quicksort the results? selection sort might be faster since we're only looking for top 10

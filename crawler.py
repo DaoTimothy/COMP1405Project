@@ -63,16 +63,16 @@ def crawl(seed):
     saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappingDict)
     return totalPages
 
-def deleteFolder(string):
-    if os.path.exists(string):
-        files = os.listdir(string)
+def deleteFolder(path):
+    if os.path.exists(path):
+        files = os.listdir(path)
         for file in files:
-            absolutePath = os.path.join(string, file)
+            absolutePath = os.path.join(path, file)
             if os.path.isdir(absolutePath):
                 deleteFolder(absolutePath)
             elif os.path.isfile(absolutePath):
                 os.remove(absolutePath)
-    os.rmdir(string)
+    os.rmdir(path)
     return
 
 def addend(list, dict, value):
