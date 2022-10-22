@@ -8,6 +8,9 @@ def search(phrase, boost):
     print(queryVec)
     return
 
+
+
+
 def queryvector(phrase):
     dict = rawtexttodict(phrase)
     result = []

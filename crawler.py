@@ -1,4 +1,3 @@
-from cgi import print_directory
 import webdev
 import math
 import os
@@ -10,6 +9,8 @@ linkindex = 2
 def crawl(seed):
     if os.path.exists("PageResults"):
         deleteFolder("PageResults")
+    if os.path.exists("idf"):
+        deleteFolder("idf")
     os.mkdir("PageResults")
 
     #variables required for crawl
@@ -37,17 +38,13 @@ def crawl(seed):
 
         for link in content[linkindex]:
             absoluteLink = buildLink(currentLink, link)
-            
             outgoingLinks.append(absoluteLink)
-
             if absoluteLink not in incomingLinks:
                 incomingLinks[absoluteLink] = []
             incomingLinks[absoluteLink].append(currentLink)
             
-            #print(absolutelink)
             if absoluteLink not in readPages and not containshash(unreadDict, absoluteLink):
                 addend(unreadList, unreadDict, absoluteLink)
-        #print(content[wordsindex])
         wordDict = rawtexttodict(content[wordsindex])
         wordList = content[wordsindex].replace("\n", " ").split()
         for word in wordDict:
@@ -56,23 +53,19 @@ def crawl(seed):
             tfDict[word] = wordDict[word]/len(wordList)
         totalPages += 1
         savePage(currentLink, outgoingLinks, wordDict, tfDict)
-    file = open("PageResults/master.txt", "w")
+    file = open(os.path.join("PageResults", "master.txt"), "w")
     file.write(str(totalPages)+"\n")
-    idfDict = {}
-    for word in allWords:
-        idfDict[word] = calcIdf(word, totalPages)
-    file.write(dicttojson(idfDict)+"\n")
     file.close()
     pageRankList = pagerank.pagerank(incomingLinks)[0]
     mappingDict = pagerank.idmapping(incomingLinks)
-    saveInfoAfterCrawl(incomingLinks, idfDict, pageRankList, mappingDict)
+    saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappingDict)
     return totalPages
 
 def deleteFolder(string):
     if os.path.exists(string):
         files = os.listdir(string)
         for file in files:
-            absolutePath = string+"/"+file
+            absolutePath = os.path.join(string, file)
             if os.path.isdir(absolutePath):
                 deleteFolder(absolutePath)
             elif os.path.isfile(absolutePath):
@@ -103,7 +96,6 @@ def containshash(dict, value):
 def readHtml(list):
     result = ["", "", ""]
     links = []
-    #print(list)
     for element in list:
         if len(element) == 0:
             continue
@@ -126,77 +118,87 @@ def buildLink(currenturl, string):
         urlparts = currenturl.split("/")
         result = ""
         for part in range(0, len(urlparts)-1):
-            result += urlparts[part]
-            result += "/"
-        result = result[0:len(result)-1]
+            result = (result+"/"+urlparts[part])
+        result = result[0:len(result)]
         result += string[1:len(string)]
-        return result
+        return result[1:len(result)]
     return string
 
 def savePage(currentLink, outgoingLinks, wordDict, tfDict):
-    directory = "PageResults/"+buildDirectory(currentLink)
-    tfDir = directory+"/tf"
+    directory = os.path.join("PageResults", buildDirectory(currentLink))
+    tfDir = os.path.join(directory,"tf")
     os.mkdir(tfDir)
     for word in wordDict:
         if word != "":
-            file = open(tfDir+"/"+word, "w")
+            file = open(os.path.join(tfDir,word), "w")
             file.write(str(tfDict[word]))
             file.close()
-   
-    outDir = directory+"/outgoing"
+    outDir = os.path.join(directory, "outgoing")
     os.mkdir(outDir)
     for link in outgoingLinks:
         temp = link.replace(":", "").replace("/", "-")
-        file = open(outDir+"/"+temp, "w")
+        file = open(os.path.join(outDir,temp), "w")
         file.close()
     return
 
 def buildDirectory(currentLink):
-    linkParts = currentLink.split(":")
+    linkParts = currentLink.replace(":", "").split("/")
     directory = ""
     for part in linkParts:
-        directory += part
+        directory = os.path.join(directory, part)
     currentDirectory = "PageResults"
-    folders = directory.split("/")
+    folders = directory.split(os.sep)
     for i in range(len(folders)):
         if folders[i] == "":
             continue
-        elif not (os.path.exists(currentDirectory+"/"+folders[i]) or os.path.exists(currentDirectory+"/"+folders[i][0:len(folders[i])-5])):
+        elif not (os.path.exists(os.path.join(currentDirectory, folders[i])) or os.path.exists(os.path.join(currentDirectory, folders[i][0:len(folders[i])-5]))):
             if folders[i][len(folders[i])-5:len(folders[i])] == ".html":
-                os.mkdir(currentDirectory+"/"+folders[i][0:len(folders[i])-5])
+                os.mkdir(os.path.join(currentDirectory,folders[i][0:len(folders[i])-5]))
             else:
-                os.mkdir(currentDirectory+"/"+folders[i])
-        currentDirectory += "/" + folders[i]
+                os.mkdir(os.path.join(currentDirectory,folders[i]))
+        currentDirectory= os.path.join(currentDirectory,folders[i])
+        #currentDirectory += "/" + folders[i]
     return directory[0:len(directory)-5]
 
-def saveInfoAfterCrawl(incomingLinks, idfDict, pageRankList, mappingDict):
+def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappingDict):
+    idfDir = "idf"
+    os.mkdir(idfDir)
+    for word in allWords:
+        if word != "":
+            file = open(os.path.join(idfDir, word), "w")
+            file.write(str(calcIdf(word, totalPages)))
+            file.close()
     for page in incomingLinks:
-        directory = "PageResults/"+buildDirectory(page)
-        #print(directory)
-        tf_idfDir = directory+"/tf_idf"
-        #print(tf_idfDir)
+        directory = os.path.join("PageResults", buildDirectory(page))
+
+        tf_idfDir= os.path.join(directory,"tf_idf")
+   
+
         os.mkdir(tf_idfDir)
-        
-        tfDir = directory+"/tf"
+        tfDir = os.path.join(directory,"tf")
         words = os.listdir(tfDir)
-        #print(words)
         for word in words:
-            file = open(tfDir+"/"+word, "r")
+            file = open(os.path.join(tfDir, word), "r")
             tf = file.readline()
             file.close()
-            file = open(tf_idfDir+"/"+word, "w")
-            file.write(str(math.log(1+float(tf)) * idfDict[word]))
+            file = open(os.path.join(idfDir, word))
+            idf = file.readline()
+            file.close()
+            file = open(os.path.join(tf_idfDir,word), "w")
+            file.write(str(math.log(1+float(tf)) * float(idf)))
             file.close()
         
-        inDir = directory+"/incoming"
+        inDir = os.path.join(directory, "incoming")
         os.mkdir(inDir)
         for link in incomingLinks[page]:
             temp = link.replace(":", "").replace("/", "-")
-            file = open(inDir+"/"+temp, "w")
+            file = open(os.path.join(inDir, temp),"w")
+            
             file.close()
     for key in mappingDict:
-        directory = "PageResults/"+buildDirectory(mappingDict[key])
-        file = open(directory+"/PageRank", "w")
+        directory = os.path.join("PageResults",buildDirectory(mappingDict[key]))
+        file = open(os.path.join(directory,"PageRank"),"w")
+        
         file.write(str(pageRankList[key]))
         file.close()
     return
@@ -224,14 +226,6 @@ def dicttojson(jsonlist):
     result += "}"
     return result
 
-def listtostring(list):
-    result = "["
-    for item in list:
-        result += "\"" + item + "\", "
-    result = result[0:len(result)-2]
-    result += "]"
-    return result
-
 
 def calcIdf(word, totalDocs):
     #visit every page and see if this word is in that dictionary.
@@ -243,9 +237,9 @@ def checkFiles(base, word, total):
     if os.path.exists(base):
         files = os.listdir(base)
         for file in files:
-            absolutePath = base+"/"+file
+            absolutePath= os.path.join(base,file)
+            
             if os.path.isfile(absolutePath) and file == word:
-                print(file, " . ", word)
                 total += 1
             elif os.path.isdir(absolutePath):
                 total += checkFiles(absolutePath, word, 0)

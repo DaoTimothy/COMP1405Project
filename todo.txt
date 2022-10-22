@@ -2,6 +2,5 @@ STUFF YOU NEED TO DO BEFORE HANDING IN THE PROJECT
 cosine similarity
 search
 quicksort results
-fix idf values
 fix all the variable names and function names to fit camelCase
 organize functions into modules to help with organization
