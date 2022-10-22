@@ -1,6 +1,11 @@
 STUFF YOU NEED TO DO BEFORE HANDING IN THE PROJECT
-cosine similarity
-search
-quicksort results
+
+search:
+    query vector
+    document vector
+    cosine similarity
+    boost/noboost
+    quicksort the results? selection sort might be faster since we're only looking for top 10
+    
 fix all the variable names and function names to fit camelCase
 organize functions into modules to help with organization
