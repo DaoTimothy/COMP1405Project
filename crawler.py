@@ -214,19 +214,6 @@ def rawtexttodict(string):
             result[word] += 1
     return result
 
-def dicttojson(jsonlist):
-    result = "{"
-    for key in jsonlist:
-        result += "\""
-        result += key
-        result += "\":\""
-        result += str(jsonlist[key])
-        result += "\","
-    result = result[0:len(result)-1]
-    result += "}"
-    return result
-
-
 def calcIdf(word, totalDocs):
     #visit every page and see if this word is in that dictionary.
     numerator = totalDocs

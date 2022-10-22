@@ -56,28 +56,6 @@ def openPage(URL):
         return path
     return None
 
-def closeFile(file):
-    file.close()
-    return
-
-def stringToList(string):
-    result = []
-    item = ""
-    readingItem = False
-    for char in string:
-        if char == "[" or char == "]":
-            continue
-        if char == "\"" and not readingItem:
-            readingItem = True
-        elif char == "\"" and readingItem:
-            result.append(item)
-            item = ""
-            readingItem = False
-        elif readingItem:
-            item += char
-    return result
-
-
 
 print("Out:", get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-1.html"))
 
