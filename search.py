@@ -47,6 +47,7 @@ def topten(base, queryVector, phraseList, results):
                     if results[i] < contentScore:
                         results.insert(i, contentScore)
                         del results[10]
+                        break
             elif os.path.isdir(absolutePath):
                 topten(absolutePath, queryVector, phraseList, results)
     return results
