@@ -2,6 +2,8 @@ import webdev
 import math
 import os
 import pagerank
+import time
+
 titleindex = 0
 wordsindex = 1
 linkindex = 2	
@@ -232,5 +234,8 @@ def checkFiles(base, word, total):
                 total += checkFiles(absolutePath, word, 0)
     return total
 
-temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
-print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
+temp = "http://people.scs.carleton.ca/~davidmckenney/fruits/N-0.html"
+startTime = time.time()
+print(crawl("http://people.scs.carleton.ca/~davidmckenney/fruits/N-0.html"))
+totalTime = time.time() - startTime
+print(int(totalTime), "Seconds")

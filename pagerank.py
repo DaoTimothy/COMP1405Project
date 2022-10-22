@@ -81,7 +81,9 @@ def dotproduct(matrix,vector):
 def finalvector(matrix):
     threshhold = 0.0001
     dist=1
-    oldvector=[[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]]
+    oldvector = [[]]
+    for i in range(len(matrix)):
+        oldvector[0].append(0.1)
     newvector=[dotproduct(matrix,oldvector)]
     while dist>threshhold: 
         newvector=[dotproduct(matrix,newvector)]
