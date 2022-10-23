@@ -3,8 +3,8 @@ import math
 import os
 import time
 
-import pagerank
-import improvedqueue
+import modules.pagerank as pagerank
+import modules.improvedqueue as improvedqueue
 
 titleIndex = 0
 wordsIndex = 1
@@ -58,7 +58,7 @@ def crawl(seed):
         totalPages += 1
         savePage(currentLink, outgoingLinks, wordDict, tfDict, content[titleIndex])
     pagerankList = pagerank.pagerank(incomingLinks)[0]
-    mappingDict = pagerank.idmapping(incomingLinks)
+    mappingDict = pagerank.idMapping(incomingLinks)
     saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappingDict)
     return totalPages
 

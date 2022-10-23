@@ -1,6 +1,4 @@
-
-import matmult
-
+import modules.matmult as matmult
 
 """
 0=PG3
