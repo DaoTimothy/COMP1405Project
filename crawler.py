@@ -1,3 +1,4 @@
+from fileinput import close
 import webdev
 import math
 import os
@@ -54,7 +55,7 @@ def crawl(seed):
                 allWords[word] = 1
             tfDict[word] = wordDict[word]/len(wordList)
         totalPages += 1
-        savePage(currentLink, outgoingLinks, wordDict, tfDict)
+        savePage(currentLink, outgoingLinks, wordDict, tfDict, content[titleindex])
     file = open(os.path.join("PageResults", "master.txt"), "w")
     file.write(str(totalPages)+"\n")
     file.close()
@@ -126,8 +127,11 @@ def buildLink(currenturl, string):
         return result[1:len(result)]
     return string
 
-def savePage(currentLink, outgoingLinks, wordDict, tfDict):
+def savePage(currentLink, outgoingLinks, wordDict, tfDict, title):
     directory = os.path.join("PageResults", buildDirectory(currentLink))
+    file = open(os.path.join(directory, "title.txt"), "w")
+    file.write(title)
+    file.close()
     tfDir = os.path.join(directory,"tf")
     os.mkdir(tfDir)
     for word in wordDict:
@@ -234,8 +238,10 @@ def checkFiles(base, word, total):
                 total += checkFiles(absolutePath, word, 0)
     return total
 
-temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
+
+
+temp = "http://people.scs.carleton.ca/~davidmckenney/fruits/N-0.html"
 startTime = time.time()
-print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
+print(crawl("http://people.scs.carleton.ca/~davidmckenney/fruits/N-0.html"))
 totalTime = time.time() - startTime
 print(int(totalTime), "Seconds")
