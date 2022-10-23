@@ -15,88 +15,88 @@ import matmult
 9=PG9
 """
 
-def pagerank(incominglinksdict):
-    idmap = idmapping(incominglinksdict)
-    matrix= creatematrix(idmap,incominglinksdict)
-    pageranking = finalvector(matrix)
+def pagerank(incomingLinksDict):
+    idMap = idMapping(incomingLinksDict)
+    matrix = createMatrix(idMap,incomingLinksDict)
+    pageranking = finalVector(matrix)
     return pageranking
 
 
-def idmapping(incominglinksdict):
-    fileid = {}
-    count=0
-    for key in incominglinksdict:
-        fileid[count]=key
-        count+=1
-    return fileid
+def idMapping(incomingLinksDict):
+    fileID = {}
+    count = 0
+    for key in incomingLinksDict:
+        fileID[count] = key
+        count += 1
+    return fileID
 
-def creatematrix(idmap,incominglinksdict):
+def createMatrix(idMap,incomingLinksDict):
     alpha = 0.1
-    matrix=[]
-    notcount=0
-    yescount=0
-    totalpgs=len(idmap)
+    matrix = []
+    notCount = 0
+    yesCount = 0
+    totalPages = len(idMap)
 
     #Creates Adjacency row with 1 and 0s ONLY
-    for key in idmap:
-        row=[]
-        sidepage = idmap[key]
+    for key in idMap:
+        row = []
+        sidePage = idMap[key]
 
-        for toprow in range(0,totalpgs):
-            toppage= idmap[toprow]#onverts top row number to the page
+        for toprow in range(0, totalPages):
+            toppage = idMap[toprow]#onverts top row number to the page
 
-            #Checks if the sidepage is contained in the incoming links of the top page
-            if sidepage in  incominglinksdict[toppage]:
+            #Checks if the sidePage is contained in the incoming links of the top page
+            if sidePage in incomingLinksDict[toppage]:
                 row.append(1)
-                yescount+=1
-                notcount=0
+                yesCount += 1
+                notCount = 0
             else:
                 row.append(0)
-                notcount+=1
-                if notcount==totalpgs: #Checks if the page had no incoming links, row is all zeros
-                    row=[]
-                    for i in range(totalpgs):
-                        row.append(1/totalpgs)#Can teleport to any page with 1/n probability
+                notCount += 1
+                if notCount == totalPages: #Checks if the page had no incoming links, row is all zeros
+                    row = []
+                    for i in range(totalPages):
+                        row.append(1 / totalPages)#Can teleport to any page with 1/n probability
 
         #Initial transition probability matrix (dividing rows by # of 1s):
         for i in range(len(row)):
-            if row[i]==1:
-                row[i]=1/yescount
-            row[i] = row[i]*(1-alpha)+ alpha/totalpgs
+            if row[i] == 1:
+                row[i] = 1 / yesCount
+            row[i] = row[i] * (1-alpha) + alpha / totalPages
          
 
         
 
-        yescount=0
-        notcount=0
+        yesCount = 0
+        notCount = 0
         matrix.append(row)
         
     return matrix
 
-def finalvector(matrix):
+def finalVector(matrix):
     threshhold = 0.0001
-    dist=1
-    oldvector = [[]]
+    dist = 1
+    oldVector = [[]]
     for i in range(len(matrix)):
-        oldvector[0].append(0.1)
-    newvector=[dotproduct(matrix,oldvector)]
-    while dist>threshhold: 
-        newvector=[dotproduct(matrix,newvector)]
-        dist= matmult.euclidean_dist(newvector,oldvector)
-        oldvector=newvector
-    return newvector
+        oldVector[0].append(0.1)
+    newVector = [dotProduct(matrix,oldVector)]
+    while dist > threshhold: 
+        newVector = [dotProduct(matrix,newVector)]
+        dist = matmult.euclidean_dist(newVector, oldVector)
+        oldVector = newVector
+    return newVector
         
-def dotproduct(matrix,vector):
-    newvector=[]
+def dotProduct(matrix, vector):
+    newVector = []
     for column in range(len(vector[0])):
-        sum=0
-        index=0
+        sum = 0
+        index = 0
         for row in matrix:
-            sum+=row[column]*vector[0][index]
-            index+=1
-        newvector.append(sum)
+            sum += row[column] * vector[0][index]
+            index += 1
+        newVector.append(sum)
         
-    return newvector
+    return newVector
 
 
 

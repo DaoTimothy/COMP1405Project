@@ -1,22 +1,22 @@
 import os
-import searchdata
 import math
 
+import searchdata
 import time
 
 def search(phrase, boost):
     phraseList = phrase.split()
-    queryVector = queryvector(phrase, phraseList)
+    queryVector = getQueryVector(phrase, phraseList)
     temp = [{'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}]
-    return topten("PageResults", queryVector, phraseList, boost, temp)
+    return topTen("PageResults", queryVector, phraseList, boost, temp)
 
 #This function's goal is to return a list representing the vector of the user's query.
 #Input:
 # phrase - string representing a search query from the user.
 # phraseList - a list representing the search query as well.
 #Output: a vector of the tf_idf values of each word in the search query, in the order that they appeared within the query. 
-def queryvector(phrase, phraseList):
-    dict = rawtexttodict(phrase)
+def getQueryVector(phrase, phraseList):
+    dict = stringToDict(phrase)
     result = []
     for word in phraseList:
         tf = dict[word] / len(phraseList)
@@ -27,7 +27,7 @@ def queryvector(phrase, phraseList):
 #Input: 
 # string - a string of words, separated by spaces.
 #Output: a dictionary representation of the string, with each key being a unique word in the string, and the value of each key being the number of times that word appears in the string.
-def rawtexttodict(string):
+def stringToDict(string):
     result = {}
     words = string.split(" ")
     for word in words:
@@ -45,7 +45,7 @@ def rawtexttodict(string):
 # boost - a boolean value to decide whether a page's cosine similarity should be boosted by its' pagerank.
 # results - a list of dictionaries representing the top ten pages with the highest content scores. It's included in the parameters because the function is recursive.
 #Output: a list of dictionaries representing the top ten pages with the highest content scores.
-def topten(base, queryVector, phraseList, boost, results):
+def topTen(base, queryVector, phraseList, boost, results):
     if os.path.exists(base):
         files = os.listdir(base)
         for file in files:
@@ -53,8 +53,8 @@ def topten(base, queryVector, phraseList, boost, results):
             #print(absolutePath)
             if os.path.exists(os.path.join(absolutePath, "PageRank")): #if the folder reperesents a page
                 pageInfo = {}
-                pageInfo["url"] = pathtolink(absolutePath)
-                pageInfo["score"] = cosineSimilarity(queryVector, documentvector(pageInfo["url"], phraseList))
+                pageInfo["url"] = pathToLink(absolutePath)
+                pageInfo["score"] = cosineSimilarity(queryVector, getDocumentVector(pageInfo["url"], phraseList))
                 if boost:
                     pageInfo["score"] *= searchdata.get_page_rank(pageInfo["url"])
                 pageInfo["title"] = getTitle(absolutePath)
@@ -65,29 +65,29 @@ def topten(base, queryVector, phraseList, boost, results):
                         del results[10]
                         break
             elif os.path.isdir(absolutePath):
-                topten(absolutePath, queryVector, phraseList, boost, results)
+                topTen(absolutePath, queryVector, phraseList, boost, results)
     return results
 
 #This function's goal is to produce a URL based off a path within the PageResults folder.
 #Input: 
 # absolutePath - the path to a directory that represents a page.
 #Output: a string representing the URL of the page whose path was entered as a parameter.
-def pathtolink(absolutePath):
+def pathToLink(absolutePath):
     parts = absolutePath.split(os.sep)
     link = ""
     for i in range(1, len(parts)):
         if parts[i] == "http":
-            link += parts[i]+"://"
+            link += parts[i] + "://"
         else:
             link += parts[i] + "/"
-    return link[0:len(link)-1]+".html"
+    return link[0:len(link)-1] + ".html"
 
 #This function's goal is to produce a list of tf_idf values that represents the document vector.
 #Input: 
 # URL - the url of the page that we want to get a document vector for.
 # phraseList - a list of the words in the search query in the order they were entered so the document vector can mirror the query vector.
 #Output: a list of tf_idf values that represents the document vector.
-def documentvector(URL, phraseList):
+def getDocumentVector(URL, phraseList):
     result = []
     for word in phraseList:
         result.append(searchdata.get_tf_idf(URL, word))
@@ -96,25 +96,25 @@ def documentvector(URL, phraseList):
 #This function's goal is to calculate the cosine similarity between the query vector a particular document vector.
 #Input: 
 # queryVector - a list of tf_idf values representing the query vector.
-# docuVector - a list of tf_idf values representing the document vector.
+# documentVector - a list of tf_idf values representing the document vector.
 #Output: a float representing the cosine similarity between the two vectors.
-def cosineSimilarity(queryVector, docuVector):
-    numerator = dotproduct(queryVector, docuVector)
+def cosineSimilarity(queryVector, documentVector):
+    numerator = dotProduct(queryVector, documentVector)
     queryEuclidianNorm = euclidianNorm(queryVector)
-    docuEuclidianNorm = euclidianNorm(docuVector)
+    docuEuclidianNorm = euclidianNorm(documentVector)
     if docuEuclidianNorm == 0 or queryEuclidianNorm == 0:
         return 0
-    return numerator/(queryEuclidianNorm*docuEuclidianNorm)
+    return numerator / (queryEuclidianNorm * docuEuclidianNorm)
 
 #This function's goal is to return the dot product of two vectors. 
 #Input:
 # a - a vector.
 # b - another vector.
 #Output: an integer representing the dot product of the two vectors.
-def dotproduct(a, b):
+def dotProduct(a, b):
     sum = 0
     for i in range(len(a)):
-        sum += a[i]*b[i]
+        sum += a[i] * b[i]
     return sum
 
 #This function's goal is to calculate the euclidian norm of a vector. 

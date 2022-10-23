@@ -56,7 +56,7 @@ def openPage(URL):
     directory = ""
     for part in linkParts:
         directory += part
-    path = os.path.join("PageResults",directory[0:len(directory)-5])
+    path = os.path.join("PageResults", directory[0:len(directory)-5])
     if os.path.exists(path):
         return path
     return None

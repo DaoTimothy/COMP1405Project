@@ -6,9 +6,9 @@ import time
 import pagerank
 import improvedqueue
 
-titleindex = 0
-wordsindex = 1
-linkindex = 2	
+titleIndex = 0
+wordsIndex = 1
+linkIndex = 2	
 
 def crawl(seed):
     if os.path.exists("PageResults"):
@@ -36,11 +36,11 @@ def crawl(seed):
         htmlElements = contents.split("<")
         content = readHtml(htmlElements)
 
-        print("At Page", content[titleindex])
+        print("At Page", content[titleIndex])
         outgoingLinks = []
         tfDict = {}
 
-        for link in content[linkindex]:
+        for link in content[linkIndex]:
             absoluteLink = buildLink(currentLink, link)
             outgoingLinks.append(absoluteLink)
             if absoluteLink not in incomingLinks:
@@ -49,17 +49,17 @@ def crawl(seed):
             
             if absoluteLink not in readPages and not improvedqueue.containshash(unreadDict, absoluteLink):
                 improvedqueue.addend(unreadList, unreadDict, absoluteLink)
-        wordDict = rawtexttodict(content[wordsindex])
-        wordList = content[wordsindex].replace("\n", " ").split()
+        wordDict = stringToDict(content[wordsIndex])
+        wordList = content[wordsIndex].replace("\n", " ").split()
         for word in wordDict:
             if word not in allWords:
                 allWords[word] = 1
             tfDict[word] = wordDict[word]/len(wordList)
         totalPages += 1
-        savePage(currentLink, outgoingLinks, wordDict, tfDict, content[titleindex])
-    pageRankList = pagerank.pagerank(incomingLinks)[0]
+        savePage(currentLink, outgoingLinks, wordDict, tfDict, content[titleIndex])
+    pagerankList = pagerank.pagerank(incomingLinks)[0]
     mappingDict = pagerank.idmapping(incomingLinks)
-    saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappingDict)
+    saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappingDict)
     return totalPages
 
 def deleteFolder(path):
@@ -74,16 +74,16 @@ def deleteFolder(path):
     os.rmdir(path)
     return
 
-def readHtml(list):
+def readHtml(htmlContents):
     result = ["", "", ""]
     links = []
-    for element in list:
+    for element in htmlContents:
         if len(element) == 0:
             continue
         elif element[0:6] == "title>" or element[0:6] == "title ":
-            result[titleindex] = element[element.index(">")+1:len(element)]
+            result[titleIndex] = element[element.index(">")+1:len(element)]
         elif element[0:2] == "p " or element[0:2] == "p>":
-            result[wordsindex] = element[element.index(">")+1:len(element)]
+            result[wordsIndex] = element[element.index(">")+1:len(element)]
         elif "href=\"" in element:
             link = ""
             for letter in range(element.index("href=\"")+6,len(element)):
@@ -91,21 +91,21 @@ def readHtml(list):
                     break
                 link += element[letter]
             links.append(link)
-    result[linkindex] = links
+    result[linkIndex] = links
     return result
 
-def buildLink(currenturl, string):
+def buildLink(currentURL, string):
     if string[0] == ".":
-        urlparts = currenturl.split("/")
+        urlParts = currentURL.split("/")
         result = ""
-        for part in range(0, len(urlparts)-1):
-            result = (result+"/"+urlparts[part])
+        for part in range(0, len(urlParts)-1):
+            result = (result+"/"+urlParts[part])
         result = result[0:len(result)]
         result += string[1:len(string)]
         return result[1:len(result)]
     return string
 
-def rawtexttodict(string):
+def stringToDict(string):
     result = {}
     cleaned = string.replace("\n", " ")
     words = cleaned.split(" ")
@@ -155,7 +155,7 @@ def buildDirectory(currentLink):
         #currentDirectory += "/" + folders[i]
     return directory[0:len(directory)-5]
 
-def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappingDict):
+def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappingDict):
     idfDir = "idf"
     os.mkdir(idfDir)
     for word in allWords:
@@ -193,7 +193,7 @@ def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappin
         directory = os.path.join("PageResults",buildDirectory(mappingDict[key]))
         file = open(os.path.join(directory,"PageRank"),"w")
         
-        file.write(str(pageRankList[key]))
+        file.write(str(pagerankList[key]))
         file.close()
     return
 
@@ -207,7 +207,7 @@ def checkFiles(base, word, total):
     if os.path.exists(base):
         files = os.listdir(base)
         for file in files:
-            absolutePath= os.path.join(base,file)
+            absolutePath = os.path.join(base,file)
             
             if os.path.isfile(absolutePath) and file == word:
                 total += 1
