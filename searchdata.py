@@ -46,12 +46,16 @@ def get_tf_idf(URL, word):
     file = open(os.path.join(directory,"tf_idf",word),"r")
     return float(file.readline())
 
+
+#This function's goal is to get the path of a page given it's URL. If the page was not visited during the crawl, the function returns None.
+#Input:
+# URL - a string representing the URL of a webpage.
+#Output: a string representing the path to where that webpages' information is stored. Returns None if the page was not visited during the crawl.
 def openPage(URL):
     linkParts = URL.split(":")
     directory = ""
     for part in linkParts:
         directory += part
-    #path = "PageResults/"+directory[0:len(directory)-5]
     path = os.path.join("PageResults",directory[0:len(directory)-5])
     if os.path.exists(path):
         return path

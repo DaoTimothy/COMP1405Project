@@ -10,6 +10,11 @@ def search(phrase, boost):
     temp = [{'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}]
     return topten("PageResults", queryVector, phraseList, boost, temp)
 
+#This function's goal is to return a list representing the vector of the user's query.
+#Input:
+# phrase - string representing a search query from the user.
+# phraseList - a list representing the search query as well.
+#Output: a vector of the tf_idf values of each word in the search query, in the order that they appeared within the query. 
 def queryvector(phrase, phraseList):
     dict = rawtexttodict(phrase)
     result = []
@@ -18,10 +23,13 @@ def queryvector(phrase, phraseList):
         result.append(math.log(tf+1,2)*searchdata.get_idf(word))
     return result
 
+#This function's goal is to represent a string as a dictionary, to reduce processing time for when we calculate the tf values for the query vector.
+#Input: 
+# string - a string of words, separated by spaces.
+#Output: a dictionary representation of the string, with each key being a unique word in the string, and the value of each key being the number of times that word appears in the string.
 def rawtexttodict(string):
     result = {}
-    cleaned = string.replace("\n", " ")
-    words = cleaned.split(" ")
+    words = string.split(" ")
     for word in words:
         if word not in result:
             result[word] = 1
@@ -29,6 +37,14 @@ def rawtexttodict(string):
             result[word] += 1
     return result
 
+#This function's goal is to return a list of dictionaries containing the top ten pages according to score.
+#Input:
+# base - a path representing where to look for files within. Included since the function will need to recursively look through all the directories within PageResults to find all the pages.
+# queryVector - a list of tf_idf values representing the vector of the search query.
+# phraseList - a list of the words in the phrase in the order they were entered, so a document vector can be created to mirror the query vector. 
+# boost - a boolean value to decide whether a page's cosine similarity should be boosted by its' pagerank.
+# results - a list of dictionaries representing the top ten pages with the highest content scores. It's included in the parameters because the function is recursive.
+#Output: a list of dictionaries representing the top ten pages with the highest content scores.
 def topten(base, queryVector, phraseList, boost, results):
     if os.path.exists(base):
         files = os.listdir(base)
@@ -52,12 +68,22 @@ def topten(base, queryVector, phraseList, boost, results):
                 topten(absolutePath, queryVector, phraseList, boost, results)
     return results
 
+#This function's goal is to return the dot product of two vectors. 
+#Input:
+# a - a vector.
+# b - another vector.
+#Output: an integer representing the dot product of the two vectors.
 def dotproduct(a, b):
     sum = 0
     for i in range(len(a)):
         sum += a[i]*b[i]
     return sum
 
+#This function's goal is to calculate the cosine similarity between the query vector a particular document vector.
+#Input: 
+# queryVector - a list of tf_idf values representing the query vector.
+# docuVector - a list of tf_idf values representing the document vector.
+#Output: a float representing the cosine similarity between the two vectors.
 def cosineSimilarity(queryVector, docuVector):
     numerator = dotproduct(queryVector, docuVector)
     queryEuclidianNorm = euclidianNorm(queryVector)
@@ -66,18 +92,31 @@ def cosineSimilarity(queryVector, docuVector):
         return 0
     return numerator/(queryEuclidianNorm*docuEuclidianNorm)
 
+#This function's goal is to calculate the euclidian norm of a vector. 
+#Input:
+# vector - a vector.
+#Output: a float representing the euclidian norm of the vector.
 def euclidianNorm(vector):
     sum = 0
     for i in vector:
         sum += i**2
     return sum**0.5
 
+#This function's goal is to produce a list of tf_idf values that represents the document vector.
+#Input: 
+# URL - the url of the page that we want to get a document vector for.
+# phraseList - a list of the words in the search query in the order they were entered so the document vector can mirror the query vector.
+#Output: a list of tf_idf values that represents the document vector.
 def documentvector(URL, phraseList):
     result = []
     for word in phraseList:
         result.append(searchdata.get_tf_idf(URL, word))
     return result
 
+#This function's goal is to produce a URL based off a path within the PageResults folder.
+#Input: 
+# absolutePath - the path to a directory that represents a page.
+#Output: a string representing the URL of the page whose path was entered as a parameter.
 def pathtolink(absolutePath):
     parts = absolutePath.split(os.sep)
     link = ""
@@ -88,6 +127,10 @@ def pathtolink(absolutePath):
             link += parts[i] + "/"
     return link[0:len(link)-1]+".html"
 
+#This function's goal is to retrieve the title of a page given the page's path.
+#Input:
+# path - a string representing the page's path.
+#Output: a string representing the title of the page.
 def getTitle(path):
     file = open(os.path.join(path, "title.txt"), "r")
     return file.readline()

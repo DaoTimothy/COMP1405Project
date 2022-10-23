@@ -1,9 +1,9 @@
-from fileinput import close
 import webdev
 import math
 import os
 import pagerank
 import time
+import improvedqueue
 
 titleindex = 0
 wordsindex = 1
@@ -22,13 +22,13 @@ def crawl(seed):
     unreadDict = {}
     readPages = {}
     allWords = {}
-    addend(unreadList, unreadDict, seed)
+    improvedqueue.addend(unreadList, unreadDict, seed)
 
     #extra information
     incomingLinks = {}
 
     while len(unreadList) > 0:
-        currentLink = removestart(unreadList, unreadDict)
+        currentLink = improvedqueue.removestart(unreadList, unreadDict)
         readPages[currentLink] = 0
 
         contents = webdev.read_url(currentLink)
@@ -46,8 +46,8 @@ def crawl(seed):
                 incomingLinks[absoluteLink] = []
             incomingLinks[absoluteLink].append(currentLink)
             
-            if absoluteLink not in readPages and not containshash(unreadDict, absoluteLink):
-                addend(unreadList, unreadDict, absoluteLink)
+            if absoluteLink not in readPages and not improvedqueue.containshash(unreadDict, absoluteLink):
+                improvedqueue.addend(unreadList, unreadDict, absoluteLink)
         wordDict = rawtexttodict(content[wordsindex])
         wordList = content[wordsindex].replace("\n", " ").split()
         for word in wordDict:
@@ -72,26 +72,6 @@ def deleteFolder(path):
                 os.remove(absolutePath)
     os.rmdir(path)
     return
-
-def addend(list, dict, value):
-	if value not in dict:
-		dict[value] = 1
-	else:
-		dict[value] += 1
-	list.append(value)
-	
-def removestart(list, dict):
-	if len(list) == 0:
-		return None
-	dict[list[0]] -= 1
-	if dict[list[0]] == 0:
-		del dict[list[0]]
-	return list.pop(0)
-	
-def containshash(dict, value):
-	if value in dict:
-		return True
-	return False
 
 def readHtml(list):
     result = ["", "", ""]
@@ -176,7 +156,6 @@ def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappin
 
         tf_idfDir= os.path.join(directory,"tf_idf")
    
-
         os.mkdir(tf_idfDir)
         tfDir = os.path.join(directory,"tf")
         words = os.listdir(tfDir)
@@ -234,8 +213,6 @@ def checkFiles(base, word, total):
             elif os.path.isdir(absolutePath):
                 total += checkFiles(absolutePath, word, 0)
     return total
-
-
 
 temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
 startTime = time.time()

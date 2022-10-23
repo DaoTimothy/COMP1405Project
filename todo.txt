@@ -8,3 +8,4 @@ organize functions into modules to help with organization
 general cleaning up files,
 maybe move matmult and pagerank into a "modules" folder
 commenting
+WRITE THE REPORT ???
