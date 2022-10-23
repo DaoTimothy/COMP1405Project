@@ -1,13 +1,8 @@
 import os
-from webbrowser import get
 import searchdata
 import math
 
 import time
-
-scoreIndex = 0
-titleIndex = 1
-urlIndex = 2
 
 def search(phrase, boost):
     phraseList = phrase.split()

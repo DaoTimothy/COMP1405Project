@@ -56,9 +56,6 @@ def crawl(seed):
             tfDict[word] = wordDict[word]/len(wordList)
         totalPages += 1
         savePage(currentLink, outgoingLinks, wordDict, tfDict, content[titleindex])
-    file = open(os.path.join("PageResults", "master.txt"), "w")
-    file.write(str(totalPages)+"\n")
-    file.close()
     pageRankList = pagerank.pagerank(incomingLinks)[0]
     mappingDict = pagerank.idmapping(incomingLinks)
     saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappingDict)
@@ -240,8 +237,8 @@ def checkFiles(base, word, total):
 
 
 
-temp = "http://people.scs.carleton.ca/~davidmckenney/fruits/N-0.html"
+temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
 startTime = time.time()
-print(crawl("http://people.scs.carleton.ca/~davidmckenney/fruits/N-0.html"))
+print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
 totalTime = time.time() - startTime
 print(int(totalTime), "Seconds")
