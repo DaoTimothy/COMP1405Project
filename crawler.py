@@ -1,8 +1,9 @@
 import webdev
 import math
 import os
-import pagerank
 import time
+
+import pagerank
 import improvedqueue
 
 titleindex = 0
@@ -104,6 +105,17 @@ def buildLink(currenturl, string):
         return result[1:len(result)]
     return string
 
+def rawtexttodict(string):
+    result = {}
+    cleaned = string.replace("\n", " ")
+    words = cleaned.split(" ")
+    for word in words:
+        if word not in result:
+            result[word] = 1
+        else:
+            result[word] += 1
+    return result
+
 def savePage(currentLink, outgoingLinks, wordDict, tfDict, title):
     directory = os.path.join("PageResults", buildDirectory(currentLink))
     file = open(os.path.join(directory, "title.txt"), "w")
@@ -184,17 +196,6 @@ def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pageRankList, mappin
         file.write(str(pageRankList[key]))
         file.close()
     return
-
-def rawtexttodict(string):
-    result = {}
-    cleaned = string.replace("\n", " ")
-    words = cleaned.split(" ")
-    for word in words:
-        if word not in result:
-            result[word] = 1
-        else:
-            result[word] += 1
-    return result
 
 def calcIdf(word, totalDocs):
     #visit every page and see if this word is in that dictionary.

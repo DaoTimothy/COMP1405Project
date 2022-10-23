@@ -15,6 +15,13 @@ import matmult
 9=PG9
 """
 
+def pagerank(incominglinksdict):
+    idmap = idmapping(incominglinksdict)
+    matrix= creatematrix(idmap,incominglinksdict)
+    pageranking = finalvector(matrix)
+    return pageranking
+
+
 def idmapping(incominglinksdict):
     fileid = {}
     count=0
@@ -65,18 +72,6 @@ def creatematrix(idmap,incominglinksdict):
         matrix.append(row)
         
     return matrix
-        
-def dotproduct(matrix,vector):
-    newvector=[]
-    for column in range(len(vector[0])):
-        sum=0
-        index=0
-        for row in matrix:
-            sum+=row[column]*vector[0][index]
-            index+=1
-        newvector.append(sum)
-        
-    return newvector
 
 def finalvector(matrix):
     threshhold = 0.0001
@@ -91,12 +86,17 @@ def finalvector(matrix):
         oldvector=newvector
     return newvector
         
-
-def pagerank(incominglinksdict):
-    idmap = idmapping(incominglinksdict)
-    matrix= creatematrix(idmap,incominglinksdict)
-    pageranking = finalvector(matrix)
-    return pageranking
+def dotproduct(matrix,vector):
+    newvector=[]
+    for column in range(len(vector[0])):
+        sum=0
+        index=0
+        for row in matrix:
+            sum+=row[column]*vector[0][index]
+            index+=1
+        newvector.append(sum)
+        
+    return newvector
 
 
 

@@ -68,16 +68,30 @@ def topten(base, queryVector, phraseList, boost, results):
                 topten(absolutePath, queryVector, phraseList, boost, results)
     return results
 
-#This function's goal is to return the dot product of two vectors. 
-#Input:
-# a - a vector.
-# b - another vector.
-#Output: an integer representing the dot product of the two vectors.
-def dotproduct(a, b):
-    sum = 0
-    for i in range(len(a)):
-        sum += a[i]*b[i]
-    return sum
+#This function's goal is to produce a URL based off a path within the PageResults folder.
+#Input: 
+# absolutePath - the path to a directory that represents a page.
+#Output: a string representing the URL of the page whose path was entered as a parameter.
+def pathtolink(absolutePath):
+    parts = absolutePath.split(os.sep)
+    link = ""
+    for i in range(1, len(parts)):
+        if parts[i] == "http":
+            link += parts[i]+"://"
+        else:
+            link += parts[i] + "/"
+    return link[0:len(link)-1]+".html"
+
+#This function's goal is to produce a list of tf_idf values that represents the document vector.
+#Input: 
+# URL - the url of the page that we want to get a document vector for.
+# phraseList - a list of the words in the search query in the order they were entered so the document vector can mirror the query vector.
+#Output: a list of tf_idf values that represents the document vector.
+def documentvector(URL, phraseList):
+    result = []
+    for word in phraseList:
+        result.append(searchdata.get_tf_idf(URL, word))
+    return result
 
 #This function's goal is to calculate the cosine similarity between the query vector a particular document vector.
 #Input: 
@@ -92,6 +106,17 @@ def cosineSimilarity(queryVector, docuVector):
         return 0
     return numerator/(queryEuclidianNorm*docuEuclidianNorm)
 
+#This function's goal is to return the dot product of two vectors. 
+#Input:
+# a - a vector.
+# b - another vector.
+#Output: an integer representing the dot product of the two vectors.
+def dotproduct(a, b):
+    sum = 0
+    for i in range(len(a)):
+        sum += a[i]*b[i]
+    return sum
+
 #This function's goal is to calculate the euclidian norm of a vector. 
 #Input:
 # vector - a vector.
@@ -101,31 +126,6 @@ def euclidianNorm(vector):
     for i in vector:
         sum += i**2
     return sum**0.5
-
-#This function's goal is to produce a list of tf_idf values that represents the document vector.
-#Input: 
-# URL - the url of the page that we want to get a document vector for.
-# phraseList - a list of the words in the search query in the order they were entered so the document vector can mirror the query vector.
-#Output: a list of tf_idf values that represents the document vector.
-def documentvector(URL, phraseList):
-    result = []
-    for word in phraseList:
-        result.append(searchdata.get_tf_idf(URL, word))
-    return result
-
-#This function's goal is to produce a URL based off a path within the PageResults folder.
-#Input: 
-# absolutePath - the path to a directory that represents a page.
-#Output: a string representing the URL of the page whose path was entered as a parameter.
-def pathtolink(absolutePath):
-    parts = absolutePath.split(os.sep)
-    link = ""
-    for i in range(1, len(parts)):
-        if parts[i] == "http":
-            link += parts[i]+"://"
-        else:
-            link += parts[i] + "/"
-    return link[0:len(link)-1]+".html"
 
 #This function's goal is to retrieve the title of a page given the page's path.
 #Input:
