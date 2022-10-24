@@ -120,7 +120,6 @@ def stringToDict(string):
 
 def savePage(currentLink, outgoingLinks, wordDict, tfDict, title):
     directory = os.path.join("PageResults", buildDirectory(currentLink))
-    print(directory)
     file = open(os.path.join(directory, "title.txt"), "w")
     file.write(title)
     file.close()
