@@ -6,6 +6,8 @@ import time
 import modules.pagerank as pagerank
 import modules.improvedqueue as improvedqueue
 
+import searchdata
+
 titleIndex = 0
 wordsIndex = 1
 linkIndex = 2	
@@ -36,7 +38,7 @@ def crawl(seed):
         htmlElements = contents.split("<")
         content = readHtml(htmlElements)
 
-        print("At Page", content[titleIndex])
+        #print("At Page", content[titleIndex])
         outgoingLinks = []
         tfDict = {}
 
@@ -118,6 +120,7 @@ def stringToDict(string):
 
 def savePage(currentLink, outgoingLinks, wordDict, tfDict, title):
     directory = os.path.join("PageResults", buildDirectory(currentLink))
+    print(directory)
     file = open(os.path.join(directory, "title.txt"), "w")
     file.write(title)
     file.close()
@@ -131,7 +134,7 @@ def savePage(currentLink, outgoingLinks, wordDict, tfDict, title):
     outDir = os.path.join(directory, "outgoing")
     os.mkdir(outDir)
     for link in outgoingLinks:
-        temp = link.replace(":", "").replace("/", "-")
+        temp = link.replace(":", "").replace("/", "}")
         file = open(os.path.join(outDir,temp), "w")
         file.close()
     return
@@ -147,13 +150,10 @@ def buildDirectory(currentLink):
         if folders[i] == "":
             continue
         elif not (os.path.exists(os.path.join(currentDirectory, folders[i])) or os.path.exists(os.path.join(currentDirectory, folders[i][0:len(folders[i])-5]))):
-            if folders[i][len(folders[i])-5:len(folders[i])] == ".html":
-                os.mkdir(os.path.join(currentDirectory,folders[i][0:len(folders[i])-5]))
-            else:
-                os.mkdir(os.path.join(currentDirectory,folders[i]))
+            os.mkdir(os.path.join(currentDirectory,folders[i]))
         currentDirectory= os.path.join(currentDirectory,folders[i])
         #currentDirectory += "/" + folders[i]
-    return directory[0:len(directory)-5]
+    return directory
 
 def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappingDict):
     idfDir = "idf"
@@ -172,20 +172,16 @@ def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappin
         tfDir = os.path.join(directory,"tf")
         words = os.listdir(tfDir)
         for word in words:
-            file = open(os.path.join(tfDir, word), "r")
-            tf = file.readline()
-            file.close()
-            file = open(os.path.join(idfDir, word))
-            idf = file.readline()
-            file.close()
+            tf = searchdata.get_tf(page, word)
+            idf = searchdata.get_idf(word)
             file = open(os.path.join(tf_idfDir,word), "w")
-            file.write(str(math.log(1+float(tf)) * float(idf)))
+            file.write(str(math.log(1+tf, 2) * idf))
             file.close()
         
         inDir = os.path.join(directory, "incoming")
         os.mkdir(inDir)
         for link in incomingLinks[page]:
-            temp = link.replace(":", "").replace("/", "-")
+            temp = link.replace(":", "").replace("/", "}")
             file = open(os.path.join(inDir, temp),"w")
             
             file.close()
@@ -215,8 +211,11 @@ def checkFiles(base, word, total):
                 total += checkFiles(absolutePath, word, 0)
     return total
 
-temp = "http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"
+crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html")
+"""
+temp = "http://people.scs.carleton.ca/~davidmckenney/fruits/N-0.html"
 startTime = time.time()
-print(crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html"))
+
 totalTime = time.time() - startTime
 print(int(totalTime), "Seconds")
+"""

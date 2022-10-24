@@ -1,3 +1,4 @@
+import math
 #Takes in a scalar and a matrix and returns a matrix representing the result of scalar multiplcation between the two
 def mult_scalar(matrix, scale):
 	result = []
@@ -28,4 +29,4 @@ def euclidean_dist(a, b):
 	sum = 0
 	for i in range(len(a[0])):
 		sum += (a[0][i]-b[0][i])**2
-	return sum**0.5
+	return math.sqrt(sum)

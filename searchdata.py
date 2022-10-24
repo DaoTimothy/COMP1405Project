@@ -3,35 +3,37 @@ import os
 def get_outgoing_links(URL):
     directory = openPage(URL)
     if directory == None:
-        return 0
+        return None
     outgoingLinks = os.listdir(os.path.join(directory, "outgoing"))
     for i in range(len(outgoingLinks)):
-        outgoingLinks[i] = outgoingLinks[i].replace("-", "/").replace("http", "http:")
+        outgoingLinks[i] = outgoingLinks[i].replace("}", "/").replace("http", "http:")
     return outgoingLinks
 
 def get_incoming_links(URL):
     directory = openPage(URL)
     if directory == None:
-        return 0
+        return None
     incomingLinks = os.listdir(os.path.join(directory, "incoming"))
     for i in range(len(incomingLinks)):
-        incomingLinks[i] = incomingLinks[i].replace("-", "/").replace("http", "http:")
+        incomingLinks[i] = incomingLinks[i].replace("}", "/").replace("http", "http:")
     return incomingLinks
 
 def get_page_rank(URL):
     directory = openPage(URL)
     if directory == None:
-        return 0
+        return -1
     file = open(os.path.join(directory,"PageRank"), "r")
     return float(file.readline())
 
 def get_idf(word):
-    file = open(os.path.join("idf", word), "r")
-    return float(file.readline())
+    if os.path.exists(os.path.join("idf", word)):
+        file = open(os.path.join("idf", word), "r")
+        return float(file.readline())
+    return 0
 
 def get_tf(URL, word):
     directory = openPage(URL)
-    if directory == None:
+    if directory == None or not os.path.exists(os.path.join(directory,"tf",word)):
         return 0
     file = open(os.path.join(directory,"tf",word),"r")
     #file = open(directory+"/tf/"+word, "r")

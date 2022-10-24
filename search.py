@@ -5,22 +5,23 @@ import searchdata
 import time
 
 def search(phrase, boost):
+    phraseDict = stringToDict(phrase)
     phraseList = phrase.split()
-    queryVector = getQueryVector(phrase, phraseList)
-    temp = [{'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}, {'url' : '', 'title' : '', 'score' : 0}]
-    return topTen("PageResults", queryVector, phraseList, boost, temp)
+    queryVector = getQueryVector(phraseDict, phraseList)
+    temp = [{'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}, {'url' : '', 'title' : '', 'score' : -1}]
+    return topTen("PageResults", queryVector, phraseDict, boost, temp)
 
 #This function's goal is to return a list representing the vector of the user's query.
 #Input:
 # phrase - string representing a search query from the user.
-# phraseList - a list representing the search query as well.
+# phraseDict - a list representing the search query as well.
 #Output: a vector of the tf_idf values of each word in the search query, in the order that they appeared within the query. 
-def getQueryVector(phrase, phraseList):
-    dict = stringToDict(phrase)
+def getQueryVector(phraseDict, phraseList):
     result = []
-    for word in phraseList:
-        tf = dict[word] / len(phraseList)
-        result.append(math.log(tf+1,2)*searchdata.get_idf(word))
+    for word in phraseDict:
+        tf = phraseDict[word] / len(phraseList)
+        idf = searchdata.get_idf(word)
+        result.append(math.log(1 + tf,2)*idf)
     return result
 
 #This function's goal is to represent a string as a dictionary, to reduce processing time for when we calculate the tf values for the query vector.
@@ -41,11 +42,11 @@ def stringToDict(string):
 #Input:
 # base - a path representing where to look for files within. Included since the function will need to recursively look through all the directories within PageResults to find all the pages.
 # queryVector - a list of tf_idf values representing the vector of the search query.
-# phraseList - a list of the words in the phrase in the order they were entered, so a document vector can be created to mirror the query vector. 
+# phraseDict - a list of the words in the phrase in the order they were entered, so a document vector can be created to mirror the query vector. 
 # boost - a boolean value to decide whether a page's cosine similarity should be boosted by its' pagerank.
 # results - a list of dictionaries representing the top ten pages with the highest content scores. It's included in the parameters because the function is recursive.
 #Output: a list of dictionaries representing the top ten pages with the highest content scores.
-def topTen(base, queryVector, phraseList, boost, results):
+def topTen(base, queryVector, phraseDict, boost, results):
     if os.path.exists(base):
         files = os.listdir(base)
         for file in files:
@@ -54,18 +55,18 @@ def topTen(base, queryVector, phraseList, boost, results):
             if os.path.exists(os.path.join(absolutePath, "PageRank")): #if the folder reperesents a page
                 pageInfo = {}
                 pageInfo["url"] = pathToLink(absolutePath)
-                pageInfo["score"] = cosineSimilarity(queryVector, getDocumentVector(pageInfo["url"], phraseList))
+                pageInfo["title"] = getTitle(absolutePath)
+                pageInfo["score"] = cosineSimilarity(queryVector, getDocumentVector(pageInfo["url"], phraseDict))
                 if boost:
                     pageInfo["score"] *= searchdata.get_page_rank(pageInfo["url"])
-                pageInfo["title"] = getTitle(absolutePath)
                 
-                for i in range(len(results)):
+                for i in range(len(results)): #10 9 8 7 6 5.5 5 4 3 2
                     if results[i]["score"] < pageInfo["score"]:
                         results.insert(i, pageInfo)
                         del results[10]
                         break
             elif os.path.isdir(absolutePath):
-                topTen(absolutePath, queryVector, phraseList, boost, results)
+                topTen(absolutePath, queryVector, phraseDict, boost, results)
     return results
 
 #This function's goal is to produce a URL based off a path within the PageResults folder.
@@ -80,16 +81,16 @@ def pathToLink(absolutePath):
             link += parts[i] + "://"
         else:
             link += parts[i] + "/"
-    return link[0:len(link)-1] + ".html"
+    return link[0:len(link)-1]
 
 #This function's goal is to produce a list of tf_idf values that represents the document vector.
 #Input: 
 # URL - the url of the page that we want to get a document vector for.
-# phraseList - a list of the words in the search query in the order they were entered so the document vector can mirror the query vector.
+# phraseDict - a list of the words in the search query in the order they were entered so the document vector can mirror the query vector.
 #Output: a list of tf_idf values that represents the document vector.
-def getDocumentVector(URL, phraseList):
+def getDocumentVector(URL, phraseDict):
     result = []
-    for word in phraseList:
+    for word in phraseDict:
         result.append(searchdata.get_tf_idf(URL, word))
     return result
 
@@ -125,7 +126,7 @@ def euclidianNorm(vector):
     sum = 0
     for i in vector:
         sum += i**2
-    return sum**0.5
+    return math.sqrt(sum)
 
 #This function's goal is to retrieve the title of a page given the page's path.
 #Input:
@@ -135,6 +136,23 @@ def getTitle(path):
     file = open(os.path.join(path, "title.txt"), "r")
     return file.readline()
 
-startTime = time.time()
-search("apple coconut", False)
-print(time.time()-startTime, "Seconds")
+
+
+
+"""
+def formatOutput(list):
+    for i in range(len(list)):
+        print(str(i+1)+".", list[i]["title"], list[i]["score"])
+
+#Test #294 
+
+result = search("apple tomato peach", True) 
+expected = [{'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-0.html', 'title': 'N-0', 'score': 0.016095350631103317}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-16.html', 'title': 'N-16', 'score': 0.01173849251039794}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-3.html', 'title': 'N-3', 'score': 0.01173717685922528}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-7.html', 'title': 'N-7', 'score': 0.010985216997917413}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-8.html', 'title': 'N-8', 'score': 0.010879474014584126}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-11.html', 'title': 'N-11', 'score': 0.010129116652445442}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-12.html', 'title': 'N-12', 'score': 0.009138545567141278}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-23.html', 'title': 'N-23', 'score': 0.007851592713703313}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-9.html', 'title': 'N-9', 'score': 0.007840601893309988}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-34.html', 'title': 'N-34', 'score': 0.0074259064541596365}]
+
+def differences(a, b):
+    print("Differences:")
+    for i in range(len(a)):
+        print(str(i+1)+".", a[i]["title"], b[i]["title"], abs(a[i]["score"]-b[i]["score"]))
+
+differences(result, expected)
+"""

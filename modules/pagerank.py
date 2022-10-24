@@ -63,7 +63,7 @@ def createMatrix(idMap,incomingLinksDict):
             row[i] = row[i] * (1-alpha) + alpha / totalPages
          
 
-        
+
 
         yesCount = 0
         notCount = 0
@@ -76,7 +76,8 @@ def finalVector(matrix):
     dist = 1
     oldVector = [[]]
     for i in range(len(matrix)):
-        oldVector[0].append(0.1)
+        oldVector[0].append(0)
+    oldVector[0][1] = 1
     newVector = [dotProduct(matrix,oldVector)]
     while dist > threshhold: 
         newVector = [dotProduct(matrix,newVector)]
