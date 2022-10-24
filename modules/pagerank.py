@@ -1,5 +1,4 @@
-import modules.matmult as matmult
-
+import math
 """
 0=PG3
 1=PG4
@@ -61,9 +60,6 @@ def createMatrix(idMap,incomingLinksDict):
             if row[i] == 1:
                 row[i] = 1 / yesCount
             row[i] = row[i] * (1-alpha) + alpha / totalPages
-         
-
-
 
         yesCount = 0
         notCount = 0
@@ -81,7 +77,7 @@ def finalVector(matrix):
     newVector = [dotProduct(matrix,oldVector)]
     while dist > threshhold: 
         newVector = [dotProduct(matrix,newVector)]
-        dist = matmult.euclidean_dist(newVector, oldVector)
+        dist = euclidean_dist(newVector, oldVector)
         oldVector = newVector
     return newVector
         
@@ -97,8 +93,8 @@ def dotProduct(matrix, vector):
         
     return newVector
 
-
-
-
-
-
+def euclidean_dist(a, b):
+	sum = 0
+	for i in range(len(a[0])):
+		sum += (a[0][i]-b[0][i])**2
+	return math.sqrt(sum)

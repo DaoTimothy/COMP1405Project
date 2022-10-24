@@ -101,11 +101,11 @@ def getDocumentVector(URL, phraseDict):
 #Output: a float representing the cosine similarity between the two vectors.
 def cosineSimilarity(queryVector, documentVector):
     numerator = dotProduct(queryVector, documentVector)
-    queryEuclidianNorm = euclidianNorm(queryVector)
-    docuEuclidianNorm = euclidianNorm(documentVector)
-    if docuEuclidianNorm == 0 or queryEuclidianNorm == 0:
+    queryEuclideanNorm = EuclideanNorm(queryVector)
+    docuEuclideanNorm = EuclideanNorm(documentVector)
+    if docuEuclideanNorm == 0 or queryEuclideanNorm == 0:
         return 0
-    return numerator / (queryEuclidianNorm * docuEuclidianNorm)
+    return numerator / (queryEuclideanNorm * docuEuclideanNorm)
 
 #This function's goal is to return the dot product of two vectors. 
 #Input:
@@ -118,11 +118,11 @@ def dotProduct(a, b):
         sum += a[i] * b[i]
     return sum
 
-#This function's goal is to calculate the euclidian norm of a vector. 
+#This function's goal is to calculate the Euclidean norm of a vector. 
 #Input:
 # vector - a vector.
-#Output: a float representing the euclidian norm of the vector.
-def euclidianNorm(vector):
+#Output: a float representing the Euclidean norm of the vector.
+def EuclideanNorm(vector):
     sum = 0
     for i in vector:
         sum += i**2
