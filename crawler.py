@@ -85,7 +85,7 @@ def readHtml(htmlContents):
         elif element[0:6] == "title>" or element[0:6] == "title ":
             result[titleIndex] = element[element.index(">")+1:len(element)]
         elif element[0:2] == "p " or element[0:2] == "p>":
-            result[wordsIndex] = element[element.index(">")+1:len(element)]
+            result[wordsIndex] += element[element.index(">")+1:len(element)] + " "
         elif "href=\"" in element:
             link = ""
             for letter in range(element.index("href=\"")+6,len(element)):
