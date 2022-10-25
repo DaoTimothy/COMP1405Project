@@ -54,16 +54,17 @@ def get_tf_idf(URL, word):
 # URL - a string representing the URL of a webpage.
 #Output: a string representing the path to where that webpages' information is stored. Returns None if the page was not visited during the crawl.
 def openPage(URL):
-    linkParts = URL.split(":")
+    linkParts = URL.replace(":", "").split("/")
     directory = ""
     for part in linkParts:
-        directory += part
-    path = os.path.join("PageResults", directory[0:len(directory)-5])
+        directory = os.path.join(directory, part)
+    #print(directory)
+    path = os.path.join("PageResults", directory)
+    print(path)
     if os.path.exists(path):
         return path
     return None
 
-"""
 print("Out:", get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/fruits/N-1.html"))
 
 print("In:", get_incoming_links("http://people.scs.carleton.ca/~davidmckenney/fruits/N-1.html"))
@@ -72,4 +73,3 @@ print("TF:", get_tf("http://people.scs.carleton.ca/~davidmckenney/fruits/N-1.htm
 print("IDF:", get_idf("coconut"))
 
 print("TFIDF:", get_tf_idf("http://people.scs.carleton.ca/~davidmckenney/fruits/N-1.html", "coconut"))
-"""
