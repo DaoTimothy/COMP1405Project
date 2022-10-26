@@ -1,7 +1,6 @@
 import webdev
 import math
 import os
-import time
 
 import modules.pagerank as pagerank
 import modules.improvedqueue as improvedqueue
@@ -13,6 +12,7 @@ wordsIndex = 1
 linkIndex = 2	
 
 def crawl(seed):
+    #deleting old information
     if os.path.exists("PageResults"):
         deleteFolder("PageResults")
     if os.path.exists("idf"):
@@ -26,8 +26,6 @@ def crawl(seed):
     readPages = {}
     allWords = {}
     improvedqueue.addend(unreadList, unreadDict, seed)
-
-    #extra information
     incomingLinks = {}
 
     while len(unreadList) > 0:
@@ -64,6 +62,10 @@ def crawl(seed):
     saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappingDict)
     return totalPages
 
+#This function's goal is to delete a folder and all of it's contents
+#Input:
+# path - a string representing a file path of the folder to be deleted
+#Output: None
 def deleteFolder(path):
     if os.path.exists(path):
         files = os.listdir(path)
@@ -76,6 +78,10 @@ def deleteFolder(path):
     os.rmdir(path)
     return
 
+#This function's goal is to read through html and collect the needed information.
+#Input: 
+# htmlContents - a string of html contents that have been split at the "<" symbol.
+#Output: a list containing the title, words and links found in the html contents.
 def readHtml(htmlContents):
     result = ["", "", ""]
     links = []
@@ -96,6 +102,11 @@ def readHtml(htmlContents):
     result[linkIndex] = links
     return result
 
+#This function's goal is to build an absolute given any (relative or absolute) link.
+#Input: 
+# currentURL - a string representing the current URL the crawler is at.
+# string - a string representing the contents of an href attribute.
+#Output: a string representing an absolute link.
 def buildLink(currentURL, string):
     if string[0] == ".":
         urlParts = currentURL.split("/")
@@ -107,6 +118,10 @@ def buildLink(currentURL, string):
         return result[1:len(result)]
     return string
 
+#This function's goal is to parse through a string and add its contents to a dictionary.
+#Input:
+# string - a string of words, separated by newline characters or spaces.
+#Output: a dictionary with each key being a unique word found in the string, and the value of each being the frequency of that word within the string.
 def stringToDict(string):
     result = {}
     cleaned = string.replace("\n", " ")
@@ -118,6 +133,13 @@ def stringToDict(string):
             result[word] += 1
     return result
 
+#This function's goal is to write information that can be saved right after reading one page to files.
+#Input:
+# currentLink - a string representing the current link of the page.
+# outgoingLinks - a list of string representing all the outgoing links on a page.
+# wordDict - a dictionary that represents the word contents of the page.
+# title - a string representing the title of the page.
+#Output: None
 def savePage(currentLink, outgoingLinks, wordDict, tfDict, title):
     directory = os.path.join("PageResults", buildDirectory(currentLink))
     file = open(os.path.join(directory, "title.txt"), "w")
@@ -138,6 +160,10 @@ def savePage(currentLink, outgoingLinks, wordDict, tfDict, title):
         file.close()
     return
 
+#This function's goal is to create the necessary folders to save a page.
+#Input: 
+# currentLink - a string representing the URL of the page to be saved.
+#Output: a string representing the path of the directories where that page is saved.
 def buildDirectory(currentLink):
     linkParts = currentLink.replace(":", "").split("/")
     directory = ""
@@ -154,6 +180,14 @@ def buildDirectory(currentLink):
         #currentDirectory += "/" + folders[i]
     return directory
 
+#This function's goal is to save all of page information that is only available after the crawl has been completed.
+#Input:
+# incomingLinks - a dictionary where each key is a unique URL, and the value is a list of URLs representing the incoming links for that page.
+# allWords - a dictionary containing every unique word found within the crawl.
+# totalPages - an integer representing the total number of pages found during the crawl.
+# pagerankList - a list of pagerank values for every page.
+# mappingDict - dictionary which maps a particular page to an index within the pagerankList list.
+#Output: None
 def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappingDict):
     idfDir = "idf"
     os.mkdir(idfDir)
@@ -162,12 +196,13 @@ def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappin
             file = open(os.path.join(idfDir, word), "w")
             file.write(str(calcIdf(word, totalPages)))
             file.close()
+
     for page in incomingLinks:
         directory = os.path.join("PageResults", buildDirectory(page))
 
-        tf_idfDir= os.path.join(directory,"tf_idf")
-   
+        tf_idfDir = os.path.join(directory,"tf_idf")
         os.mkdir(tf_idfDir)
+
         tfDir = os.path.join(directory,"tf")
         words = os.listdir(tfDir)
         for word in words:
@@ -182,39 +217,39 @@ def saveInfoAfterCrawl(incomingLinks, allWords, totalPages, pagerankList, mappin
         for link in incomingLinks[page]:
             temp = link.replace(":", "").replace("/", "}")
             file = open(os.path.join(inDir, temp),"w")
-            
             file.close()
+
     for key in mappingDict:
         directory = os.path.join("PageResults",buildDirectory(mappingDict[key]))
         file = open(os.path.join(directory,"PageRank"),"w")
-        
         file.write(str(pagerankList[key]))
         file.close()
     return
 
+#This function's goal is to calculate the idf value for a word.
+#Input:
+# word - a string representing the word who's idf is to be calculated.
+# totalDocs - an integer representing the total number of pages crawled.
+#Output: a float representing the idf of the word.
 def calcIdf(word, totalDocs):
     #visit every page and see if this word is in that dictionary.
     numerator = totalDocs
     denominator = 1 + (checkFiles("PageResults", word, 0))
     return math.log(int(numerator)/int(denominator), 2)
 
+#This function's goal is to check all the files and return how many times a word has appeared within during the crawl.
+#Input:
+# base - a string representing the current directory for recursive purposes.
+# word - a string representing the word to be checked.
+# total - an integer representing the current total for the amount of times that word has been found.
+#Output: an integer representing the total number of pages that word appeared in during the crawl.
 def checkFiles(base, word, total):
     if os.path.exists(base):
         files = os.listdir(base)
         for file in files:
             absolutePath = os.path.join(base,file)
-            
             if os.path.isfile(absolutePath) and file == word:
                 total += 1
             elif os.path.isdir(absolutePath):
                 total += checkFiles(absolutePath, word, 0)
     return total
-
-crawl("http://people.scs.carleton.ca/~davidmckenney/tinyfruits/N-0.html")
-"""
-temp = "http://people.scs.carleton.ca/~davidmckenney/fruits/N-0.html"
-startTime = time.time()
-
-totalTime = time.time() - startTime
-print(int(totalTime), "Seconds")
-"""

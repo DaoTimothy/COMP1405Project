@@ -1,7 +1,6 @@
 STUFF YOU NEED TO DO BEFORE HANDING IN THE PROJECT
 
-figure out terminal commands
 do all the testing
     
 commenting
-write the README.txt
+

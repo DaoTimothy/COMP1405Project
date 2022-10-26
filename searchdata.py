@@ -36,7 +36,6 @@ def get_tf(URL, word):
     if directory == None or not os.path.exists(os.path.join(directory,"tf",word)):
         return 0
     file = open(os.path.join(directory,"tf",word),"r")
-    #file = open(directory+"/tf/"+word, "r")
     return float(file.readline())
 
 def get_tf_idf(URL, word):
@@ -58,19 +57,8 @@ def openPage(URL):
     directory = ""
     for part in linkParts:
         directory = os.path.join(directory, part)
-    #print(directory)
     path = os.path.join("PageResults", directory)
 
     if os.path.exists(path):
         return path
     return None
-""""
-print("Out:", get_outgoing_links("http://people.scs.carleton.ca/~davidmckenney/fruits/N-1.html"))
-
-print("In:", get_incoming_links("http://people.scs.carleton.ca/~davidmckenney/fruits/N-1.html"))
-
-print("TF:", get_tf("http://people.scs.carleton.ca/~davidmckenney/fruits/N-1.html", "coconut"))
-print("IDF:", get_idf("coconut"))
-
-print("TFIDF:", get_tf_idf("http://people.scs.carleton.ca/~davidmckenney/fruits/N-1.html", "coconut"))
-"""

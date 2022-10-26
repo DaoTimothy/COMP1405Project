@@ -2,7 +2,6 @@ import os
 import math
 
 import searchdata
-import time
 
 def search(phrase, boost):
     phraseDict = stringToDict(phrase)
@@ -51,7 +50,6 @@ def topTen(base, queryVector, phraseDict, boost, results):
         files = os.listdir(base)
         for file in files:
             absolutePath = os.path.join(base,file)
-            #print(absolutePath)
             if os.path.exists(os.path.join(absolutePath, "PageRank")): #if the folder reperesents a page
                 pageInfo = {}
                 pageInfo["url"] = pathToLink(absolutePath)
@@ -60,7 +58,7 @@ def topTen(base, queryVector, phraseDict, boost, results):
                 if boost:
                     pageInfo["score"] *= searchdata.get_page_rank(pageInfo["url"])
                 
-                for i in range(len(results)): #10 9 8 7 6 5.5 5 4 3 2
+                for i in range(len(results)): #insert the page in the correct spot in the top ten ranking, then delete the lowest one
                     if results[i]["score"] < pageInfo["score"]:
                         results.insert(i, pageInfo)
                         del results[10]
@@ -135,24 +133,3 @@ def euclideanNorm(vector):
 def getTitle(path):
     file = open(os.path.join(path, "title.txt"), "r")
     return file.readline()
-
-
-
-
-"""
-def formatOutput(list):
-    for i in range(len(list)):
-        print(str(i+1)+".", list[i]["title"], list[i]["score"])
-
-#Test #294 
-
-result = search("apple tomato peach", True) 
-expected = [{'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-0.html', 'title': 'N-0', 'score': 0.016095350631103317}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-16.html', 'title': 'N-16', 'score': 0.01173849251039794}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-3.html', 'title': 'N-3', 'score': 0.01173717685922528}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-7.html', 'title': 'N-7', 'score': 0.010985216997917413}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-8.html', 'title': 'N-8', 'score': 0.010879474014584126}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-11.html', 'title': 'N-11', 'score': 0.010129116652445442}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-12.html', 'title': 'N-12', 'score': 0.009138545567141278}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-23.html', 'title': 'N-23', 'score': 0.007851592713703313}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-9.html', 'title': 'N-9', 'score': 0.007840601893309988}, {'url': 'http://people.scs.carleton.ca/~davidmckenney/fruits2/N-34.html', 'title': 'N-34', 'score': 0.0074259064541596365}]
-
-def differences(a, b):
-    print("Differences:")
-    for i in range(len(a)):
-        print(str(i+1)+".", a[i]["title"], b[i]["title"], abs(a[i]["score"]-b[i]["score"]))
-
-differences(result, expected)
-"""

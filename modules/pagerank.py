@@ -1,25 +1,19 @@
 import modules.matmult as matmult
 
-"""
-0=PG3
-1=PG4
-2=PG5
-3=PG6
-4=PG8
-5=PG1
-6=PG2
-7=PG7
-8=PG0
-9=PG9
-"""
-
+#This function pieces all the other functions of this module together .
+#Input:
+# incomingLinksDict - a dictionary containing each URL as keys and every incoming link of each URL as values of the dictionary.
+#Returns the Page ranking of every URL.
 def pagerank(incomingLinksDict):
     idMap = idMapping(incomingLinksDict)
     matrix = createMatrix(idMap,incomingLinksDict)
     pageranking = finalVector(matrix)
     return pageranking
 
-
+#This function maps each page to an integer value, this makes it easier to create a matrix if every page is represented numerically.
+#Input:
+# incomingLinksDict - A dictionary containing each URL as keys and every incoming link of each URL as values of the dictionary.
+#Returns a dictionary with integers from 0 to N-Pages as keys and the page's URL as values.
 def idMapping(incomingLinksDict):
     fileID = {}
     count = 0
@@ -28,7 +22,12 @@ def idMapping(incomingLinksDict):
         count += 1
     return fileID
 
-def createMatrix(idMap,incomingLinksDict):
+#This functions sets up a 2d matrix and calculates the likelihood of jumping to all other pages from a certain page.
+#Input:
+# idMap - mapping form idMapping.
+# incomingLinksDict - same incomingLinksDict dictionary to determine if a page is contained within another.
+#Returns a 2d matrix representing the likelihood of a random surfer jumping to a any page from each page.
+def createMatrix(idMap, incomingLinksDict):
     alpha = 0.1
     matrix = []
     notCount = 0
@@ -61,16 +60,17 @@ def createMatrix(idMap,incomingLinksDict):
             if row[i] == 1:
                 row[i] = 1 / yesCount
             row[i] = row[i] * (1-alpha) + alpha / totalPages
-         
-
-
-
+            
         yesCount = 0
         notCount = 0
         matrix.append(row)
         
     return matrix
 
+#This function repeats the dot product multiplication function until the euclidian distance between the vector is really small.
+#Input:
+# matrix - calculated in createMatrix.
+#Returns a vector with the random probability of a random surfer ending up on each page (the index of the vector represents each link within the fileMAP).
 def finalVector(matrix):
     threshhold = 0.0001
     dist = 1
@@ -84,7 +84,12 @@ def finalVector(matrix):
         dist = matmult.euclidean_dist(newVector, oldVector)
         oldVector = newVector
     return newVector
-        
+    
+#Performs the matrix and vector dot product multiplication
+#Input:
+# matrix
+# vector
+#Returns the result of the dot product between the matrix and vector
 def dotProduct(matrix, vector):
     newVector = []
     for column in range(len(vector[0])):
@@ -96,9 +101,3 @@ def dotProduct(matrix, vector):
         newVector.append(sum)
         
     return newVector
-
-
-
-
-
-
